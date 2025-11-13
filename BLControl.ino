@@ -10,13 +10,11 @@
 
 
 // TODO
-// make the delay variable "num" not a global variable or make it usable to change it
+// add support for the Serial inputs from the Pi / potato
+// make a function that spin
 // maybe make it so we dont have to use allLow() which is slightly wasteful of clock cycles
-// make a lookuptable of motor position so we can seamlessly reverse polarity
-// make a step functionality using this position lookup table.
 // make a change speed function that supports ramping of speeds
 // global variables for current speed and other stuff?
-// convert the delays to microseconds for finer control ramping.
 
 
 // global variables
@@ -56,7 +54,7 @@ void loop()
   for(int i = 0; i < 6 * 7; i++)
   {
     step(1);
-    delay(10);
+    delay(100);
   }
 
   //delay(1000);
@@ -131,9 +129,7 @@ void step(int dir)
       digitalWrite(7, HIGH);
       break;
 
-    case 6:
-      digitalWrite(12, HIGH);
-      break;
+
   }
 }
 
@@ -142,6 +138,7 @@ void step(int dir)
 
 // this changes the motor position by diff
 // looping within the range 0 - 6
+// this doesnt support overflow right now
 void incrementPos(int diff)
 {
   // i honestly forgot now i figured this math out, but it works
@@ -154,6 +151,7 @@ void incrementPos(int diff)
 
 
 // optimze this eventually?
+// we may need the clock cycles at super high RPMs
 void allLow()
 {
   digitalWrite(13, LOW);  // LED
