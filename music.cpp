@@ -27,8 +27,9 @@ const float music_noteTable[12][9] = {
 // frequency in hz and time in seconds
 void playFreq(float hertz, float time)
 {
+
   int numSteps = (int)(hertz * time);
-  long unsigned int microDelay = (time/numSteps) * 1000000.0;
+  long unsigned int microDelay = (1.0/hertz) * 1000000.0;
   
   for(int i = 0; i < numSteps; i++)
   {

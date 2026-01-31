@@ -12,15 +12,11 @@
 
 
 // TODO
-// add support for the Serial inputs from the Pi / potato
-// make a function that spin
-// maybe make it so we dont have to use allLow() which is slightly wasteful of clock cycles
-// make a change speed function that supports ramping of speeds
-// global variables for current speed and other stuff?
-// make rampRPM function
+// make the rate for ramp() customisable
 
 #include "music.h"
 #include "control.h"
+#include "demos.h"
 
 
 void setup()
@@ -40,67 +36,68 @@ void setup()
 }
 
 
-float mrs = 3000;
-int temp = 1;
+byte incoming_byte = 255;
+int speed = 0;
 
 void loop()
 {
-  // the first 4 notes of meglovania lmao
-  music_bpm = 240;
-  playNote(D, 3, 4);
-  delay(10);
-  playNote(D, 3, 4);
-  delay(10);
-  playNote(D, 4, 4);
-  delay(10);
-  playNote(A, 3, 4);
-  delay(10);
-  playNote(As, 3, 8);
-  delay(10);
+  //meglovania();
 
-  delay(1000);
+  incoming_byte = Serial.read();
+  Serial.println(incoming_byte);
 
+  switch(incoming_byte)
+  {
+    case 0:
+    speed = 0;
+      break;
 
+    case 1:
+      if(speed < 3) {
+        speed++;
+      }
+      break;
 
-  //runRpm Demo
-  runRPM(600, 3);
-  delay(500);
+    case 2:
+      if(speed > -3) {
+        speed--;
+      }
+      break;
 
+    default:
+      break;
+  }
 
-  // rotate clockwise test code
+  switch(speed)
+  {
+    case 1:
+      runRPM(100, 1.0, FWD);
+      break;
 
-  // for(int i = 0; i < 6 * 7; i++)
-  // {
-  //   step(1);
-  //   delay(24);
-  // }
+    case 2:
+      runRPM(250, 1.0, FWD);
+      break;
 
-  // delay(2000);
+    case 3:
+      runRPM(500, 1.0, FWD);
+      break;
 
+    case -1:
+      runRPM(100, 1.0, REV);
+      break;
 
-  //left -> right test code 
+    case -2:
+      runRPM(250, 1.0, REV);
+      break;
 
-  // for(int i = 0; i < 6 * 7; i++)
-  // {
-  //   step(temp);
-  //   delay(5);
-  // }
+    case -3:
+      runRPM(500, 1.0, REV);
+      break;
 
-  // delay(1000);
-  // temp *= -1;
+    default:
+      speed = 0;
+      break;
 
-
-
-  // ramp to 3500 rpm test code
-
-  // step(-1);
-  // delayMicroseconds(mrs);
-  // mrs--;
-
-  // if(mrs < 400)
-  // {
-  //   mrs = 400;
-  // }
-
+  }
 
 }

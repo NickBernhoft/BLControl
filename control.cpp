@@ -4,47 +4,151 @@
 // global variables
 int motorPosition = 0; // 0-5, there are 6 positions
 
-void runRPM(int rpm, float seconds)
+// runs the motor at a certain RPM for a certain amount of seconds
+// ints are unsigned bc RPM cannot be negative
+void runRPM(unsigned int rpm, float seconds, int dir)
 {
   // rmp to steps conversion:
   float numRevs = rpm * (seconds/60.0);
   int numSteps = numRevs * 42.0;
-
-  // Serial.println(numRevs);
-  // Serial.println(numSteps);
   
   // delay between steps in microseconds
   unsigned long microDelay = (seconds / (numRevs * 42)) * 1000000.0;
 
-
   for(int i = 0; i < numSteps; i++)
   {
-    step(1);
-
-    // delayMicroseconds is only accurate up to a few thousand
+    step(dir);
+    // delayMicroseconds() is only accurate up to a few thousand
     longDelayMicroseconds(microDelay);
   }
 }
 
-//TODO
-void ramp(int startRPM, int finalRPM)
+// like runRPM() except it takes a certain number of steps in as an argument
+// ints are unsigned bc RPM cannot be negative
+void stepRPM(unsigned int rpm, int numSteps, int dir)
 {
+  // delay between steps in microseconds
+  unsigned long microDelay = (((60.0/rpm) * 1000000.0) / 42.0);
+
+  for(int i = 0; i < numSteps; i++)
+  {
+    step(dir);
+    // delayMicroseconds() is only accurate up to a few thousand
+    longDelayMicroseconds(microDelay);
+  }
+}
+
+
+// rate is in microseconds (between steps) per step
+// in this function we slowly reduce the steptime in order to speed up the motor
+// this is a more direct / low level approach then ramp2
+// this version is more open ended in the ramping funcgion
+void ramp(unsigned int startRPM, unsigned int finalRPM, int dir)
+{
+  int currentStepTime = getStepTime(startRPM);
+  int finalStepTime = getStepTime(finalRPM);
+
+  // setting a steeper initial if were starting at a very low RPM;
+
+  // increasing speed
+  if(startRPM < finalRPM)
+  {
+    while(currentStepTime > finalStepTime)
+    {
+      step(dir);
+      longDelayMicroseconds(currentStepTime);
+      currentStepTime -= currentStepTime / 100;
+    }
+
+    return;
+  }
+
+  // decreasing speed
+  if(finalRPM < startRPM)
+  {
+    while(currentStepTime < finalStepTime)
+    {
+      step(dir);
+      longDelayMicroseconds(currentStepTime);
+      currentStepTime += currentStepTime / 100;
+    }
+
+    return;
+  }
+
 
 }
 
 
 
+// ints are unsigned bc RPM cannot be negative
+// rate is the number by which we reduce the RPM per revolution (rate = -10, rpm: 100, 90, 80, 70)
+void ramp2(unsigned int startRPM, unsigned int finalRPM, int dir, unsigned int rateIn)
+{
+  int currentRPM = startRPM;
+  int diff = finalRPM - startRPM; // positave diff = increasing speed, negative meand decreasing
+  int rate = rateIn;
+  int dwell = 3; // number of steps to run a single RPM value before incrementing the RPM
+
+
+  // if diff is negative, then reduce the speed
+  if (diff < 0)
+  {
+    rate *= -1; 
+  }
+
+  int running = 1;
+  while(running)
+  {
+    // check if we are about to overshoot the final RPM, well pisk up the slack after the while loop
+
+    // case for increasing speed
+    if(diff > 0 && currentRPM + rate >= finalRPM)
+    {
+      running = 0;
+      break;
+    }
+
+    //case for decreasing speed
+    if(diff < 0 && currentRPM + rate <= finalRPM)
+    {
+      running = 0;
+      break;
+    }
+
+    currentRPM += rate;
+    stepRPM(currentRPM, dwell, dir);
+
+    // Serial.println(currentRPM);
+  }
+
+  // by this point we should have >rate number of steps to make up for
+  stepRPM(finalRPM, dwell, dir);
+
+}
+
+
+// returns the number of microseconds between steps at a certain RPM
+long unsigned int getStepTime(unsigned int rpm)
+{
+  if(rpm <= 0)
+  {
+    return 4294967295;
+  }
+
+  return (long unsigned int)( (60.0/(float)rpm * 1000000.0) /42);
+}
 
 
 // this function is for more percise delays when you get over 15ms
 // delayMicroseconds is only accurate up to a few thousand, after this use milliseconds
 void longDelayMicroseconds(unsigned long int microDelay)
 {
-    if(microDelay > 5000)
+    if(microDelay > 1000)
   {
     delay(microDelay / 1000);
     // pickup the starggling microseconds for accuracy
-    delayMicroseconds(microDelay % 5000);
+    delayMicroseconds(microDelay % 1000);
   }
   else
   {
@@ -95,6 +199,7 @@ void step(int dir)
       break;
   }
 }
+
 
 
 // this changes the motor position by diff
