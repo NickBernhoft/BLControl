@@ -21,18 +21,26 @@
 
 void setup()
 {
-  // for debugging
   Serial.begin(115200);
 
-  //LED
-  pinMode(13, OUTPUT);
-
+  // right side motors
+  pinMode(13, OUTPUT);  //LED
   pinMode(12, OUTPUT);
   pinMode(11, OUTPUT);
   pinMode(10, OUTPUT);
   pinMode(9, OUTPUT);
   pinMode(8, OUTPUT);
   pinMode(7, OUTPUT);
+
+  // left side motors
+  // setting the analog out pins as digital out
+  pinMode(A0, OUTPUT);
+  pinMode(A1, OUTPUT);
+  pinMode(A2, OUTPUT);
+  pinMode(A3, OUTPUT);
+  pinMode(A4, OUTPUT);
+  pinMode(A5, OUTPUT);
+
 }
 
 
@@ -41,24 +49,32 @@ int speed = 0;
 
 void loop()
 {
+  // demos and testing
   //meglovania();
+  //ramp2(100, 6000, FWD, 1);
+  // runRPM(3000, 10, FOWARD);
+  // delay(5000);
 
   incoming_byte = Serial.read();
   Serial.println(incoming_byte);
 
   switch(incoming_byte)
   {
-    case 0:
+    case ROVER_STOP:
+    speed = 0;
+      break;
+    
+    case ROVER_HALT:
     speed = 0;
       break;
 
-    case 1:
+    case ROVER_FWD:
       if(speed < 3) {
         speed++;
       }
       break;
 
-    case 2:
+    case ROVER_REV:
       if(speed > -3) {
         speed--;
       }

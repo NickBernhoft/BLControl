@@ -22,4 +22,18 @@ enum motor_dir
   REV = -1
 };
 
+// commands from the pi
+enum COMMANDS {
+  ROVER_STOP = 0x00,
+  ROVER_FWD = 0x01,
+  ROVER_REV = 0x02,
+  ROVER_LEFT = 0x03,
+  ROVER_RIGHT = 0x04,
+  ROVER_HALT = 0xff,
+  ROVER_FRONT = 0x05,
+  ROVER_BACK = 0x06,
+  ROVER_RAISE = 0X07,
+  ROVER_LOWER = 0X08
+};
+
 #endif // CONTROL_H
