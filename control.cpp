@@ -2,12 +2,12 @@
 #include "control.h"
 
 // global variables
-int motorPosition = 0; // 0-5, there are 6 positions
+int motorPosition[2] = {0, 0}; // 0-5, there are 6 positions
 
 
 // runs the motor at a certain RPM for a certain amount of seconds
 // ints are unsigned bc RPM cannot be negative
-void runRPM(unsigned int rpm, float seconds, int dir)
+void runRPM(unsigned int rpm, float seconds, int dir, int bank)
 {
   // rmp to steps conversion:
   float numRevs = rpm * (seconds/60.0);
@@ -20,7 +20,7 @@ void runRPM(unsigned int rpm, float seconds, int dir)
 
   for(int i = 0; i < numSteps; i++)
   {
-    step(dir);
+    step(dir, bank);
     // delayMicroseconds() is only accurate up to a few thousand
     longDelayMicroseconds(microDelay);
   }
@@ -28,14 +28,14 @@ void runRPM(unsigned int rpm, float seconds, int dir)
 
 // like runRPM() except it takes a certain number of steps in as an argument
 // ints are unsigned bc RPM cannot be negative
-void stepRPM(unsigned int rpm, int numSteps, int dir)
+void stepRPM(unsigned int rpm, int numSteps, int dir, int bank)
 {
   // delay between steps in microseconds
   unsigned long microDelay = (((60.0/rpm) * 1000000.0) / 42.0);
 
   for(int i = 0; i < numSteps; i++)
   {
-    step(dir);
+    step(dir, bank);
     // delayMicroseconds() is only accurate up to a few thousand
     longDelayMicroseconds(microDelay);
   }
@@ -46,7 +46,7 @@ void stepRPM(unsigned int rpm, int numSteps, int dir)
 // in this function we slowly reduce the steptime in order to speed up the motor
 // this is a more direct / low level approach then ramp2
 // this version is more open ended in the ramping funcgion
-void ramp(unsigned int startRPM, unsigned int finalRPM, int dir)
+void ramp(unsigned int startRPM, unsigned int finalRPM, int dir, int bank)
 {
   int currentStepTime = getStepTime(startRPM);
   int finalStepTime = getStepTime(finalRPM);
@@ -58,7 +58,7 @@ void ramp(unsigned int startRPM, unsigned int finalRPM, int dir)
   {
     while(currentStepTime > finalStepTime)
     {
-      step(dir);
+      step(dir, bank);
       longDelayMicroseconds(currentStepTime);
       currentStepTime -= currentStepTime / 100;
     }
@@ -71,7 +71,7 @@ void ramp(unsigned int startRPM, unsigned int finalRPM, int dir)
   {
     while(currentStepTime < finalStepTime)
     {
-      step(dir);
+      step(dir, bank);
       longDelayMicroseconds(currentStepTime);
       currentStepTime += currentStepTime / 100;
     }
@@ -168,37 +168,133 @@ void longDelayMicroseconds(unsigned long int microDelay)
 // 7   5
 
 // note: this code is not very optimized, its just for testing rn
-// this sets the correct pin for the winding and polariey
-void step(int dir)
+// this sets the correct pin for the winding and polarity
+// supports two independent motor banks
+void step(int dir, int bank)
 {
-  incrementPos(dir);
-  allLow();
-
-  switch(motorPosition)
+  switch(dir)
   {
-    case 0:
-      digitalWrite(12, HIGH);
-      digitalWrite(13, HIGH); // LED at the pos 0
-      break;
-    
+    case -1:
     case 1:
-      digitalWrite(10, HIGH);
+      incrementPos(dir, bank);
+      allLow(bank);
       break;
 
-    case 2:
-      digitalWrite(8, HIGH);
-      break;
+    // ignore the hard coded values lo
+    case 0:
+      incrementPos(1, 0);
+      incrementPos(-1, 1);
+      allLow(-1);
+    break;
 
-    case 3:
-      digitalWrite(11, HIGH);
-      break;
+  }
 
-    case 4:
-      digitalWrite(9, HIGH);
-      break;
+  switch(bank)
+  {
+    case -1: // all banks
+      switch(motorPosition[bank])
+      {
+        case 0:
+          digitalWrite(12, HIGH);
+          digitalWrite(A5, HIGH);
+          digitalWrite(13, HIGH); // LED at the pos 0
+          break;
+        
+        case 1:
+          digitalWrite(10, HIGH);
+          digitalWrite(A3, HIGH);
+          break;
 
-    case 5:
-      digitalWrite(7, HIGH);
+        case 2:
+          digitalWrite(8, HIGH);
+          digitalWrite(A1, HIGH);
+          break;
+
+        case 3:
+          digitalWrite(11, HIGH);
+          digitalWrite(A4, HIGH);
+          break;
+
+        case 4:
+          digitalWrite(9, HIGH);
+          digitalWrite(A2, HIGH);
+          break;
+
+        case 5:
+          digitalWrite(7, HIGH);
+          digitalWrite(A0, HIGH);
+          break;
+
+        break;
+        
+      break;
+    }
+
+    case 0: // original bank
+      switch(motorPosition[bank])
+      {
+        case 0:
+          digitalWrite(12, HIGH);
+          digitalWrite(13, HIGH); // LED at the pos 0
+          break;
+        
+        case 1:
+          digitalWrite(10, HIGH);
+          break;
+
+        case 2:
+          digitalWrite(8, HIGH);
+          break;
+
+        case 3:
+          digitalWrite(11, HIGH);
+          break;
+
+        case 4:
+          digitalWrite(9, HIGH);
+          break;
+
+        case 5:
+          digitalWrite(7, HIGH);
+          break;
+      }
+    break;
+
+
+    // A0 = 7, A1 = 8, A2 = 9, A3 = 10, A4 = 11, A5 = 12
+    case 1: // second bank
+        switch(motorPosition[bank])
+      {
+        case 0:
+          digitalWrite(A5, HIGH);
+          digitalWrite(13, HIGH); // LED at the pos 0
+          break;
+        
+        case 1:
+          digitalWrite(A3, HIGH);
+          break;
+
+        case 2:
+          digitalWrite(A1, HIGH);
+          break;
+
+        case 3:
+          digitalWrite(A4, HIGH);
+          break;
+
+        case 4:
+          digitalWrite(A2, HIGH);
+          break;
+
+        case 5:
+          digitalWrite(A0, HIGH);
+          break;
+
+        break;
+      }
+
+
+    default:
       break;
   }
 }
@@ -208,25 +304,62 @@ void step(int dir)
 // this changes the motor position by diff
 // looping within the range 0 - 6
 // this doesnt support overflow right now
-void incrementPos(int diff)
+void incrementPos(int dir, int bank)
 {
   // i honestly forgot now i figured this math out, but it works
   // its probably not fully optimized
-  motorPosition += abs((6 + diff) % 6);
+  motorPosition[bank] += abs((6 + dir) % 6);
   // maybe motorPosition += abs((6 * diff) % 6);
-  motorPosition = motorPosition % 6; // this supports the overflow
+  motorPosition[bank] = motorPosition[bank] % 6; // this supports the overflow
   //Serial.println(motorPosition);
 }
 
 // optimze this eventually?
 // we may need the clock cycles at super high RPMs
-void allLow()
+void allLow(int bank)
 {
-  digitalWrite(13, LOW);  // LED
-  digitalWrite(12, LOW);
-  digitalWrite(11, LOW);
-  digitalWrite(10, LOW);
-  digitalWrite(9, LOW);
-  digitalWrite(8, LOW);
-  digitalWrite(7, LOW);
+  switch(bank)
+  {
+        // all case
+    case -1:
+      digitalWrite(A0, LOW);
+      digitalWrite(A1, LOW);
+      digitalWrite(A2, LOW);
+      digitalWrite(A3, LOW);
+      digitalWrite(A4, LOW);
+      digitalWrite(A5, LOW);
+      digitalWrite(A6, LOW);
+      digitalWrite(13, LOW);  // LED
+      digitalWrite(12, LOW);
+      digitalWrite(11, LOW);
+      digitalWrite(10, LOW);
+      digitalWrite(9, LOW);
+      digitalWrite(8, LOW);
+      digitalWrite(7, LOW);
+      break;
+
+    case 0:
+      digitalWrite(13, LOW);  // LED
+      digitalWrite(12, LOW);
+      digitalWrite(11, LOW);
+      digitalWrite(10, LOW);
+      digitalWrite(9, LOW);
+      digitalWrite(8, LOW);
+      digitalWrite(7, LOW);
+      break;
+
+    case 1:
+      digitalWrite(A0, LOW);  // LED
+      digitalWrite(A1, LOW);
+      digitalWrite(A2, LOW);
+      digitalWrite(A3, LOW);
+      digitalWrite(A4, LOW);
+      digitalWrite(A5, LOW);
+      digitalWrite(A6, LOW);
+      break;
+
+      default:
+        break;
+  }
+
 }

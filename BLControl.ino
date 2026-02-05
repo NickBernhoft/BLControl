@@ -40,7 +40,6 @@ void setup()
   pinMode(A3, OUTPUT);
   pinMode(A4, OUTPUT);
   pinMode(A5, OUTPUT);
-
 }
 
 
@@ -49,71 +48,76 @@ int speed = 0;
 
 void loop()
 {
-  // demos and testing
-  //meglovania();
-  //ramp2(100, 6000, FWD, 1);
+  //demos and testing
+  // meglovania();
+  // ramp2(100, 20000, FWD, 1);
+  // ramp2(20000, 100, FWD, 3);
   // runRPM(3000, 10, FOWARD);
   // delay(5000);
 
-  incoming_byte = Serial.read();
-  Serial.println(incoming_byte);
+  runRPM(500, 5.0, SPIN, -1);
+  runRPM(500, 5.0, REV, -1);
+  // runRPM(500, 5.0, REV, 1);
+  delay(2000);
 
-  switch(incoming_byte)
-  {
-    case ROVER_STOP:
-    speed = 0;
-      break;
-    
-    case ROVER_HALT:
-    speed = 0;
-      break;
+  // incoming_byte = Serial.read();
+  // Serial.println(incoming_byte);
 
-    case ROVER_FWD:
-      if(speed < 3) {
-        speed++;
-      }
-      break;
+  // incoming_byte = ROVER_FWD;
 
-    case ROVER_REV:
-      if(speed > -3) {
-        speed--;
-      }
-      break;
+  // switch(incoming_byte)
+  // {
+  //   case ROVER_HALT: // fallthrough
+  //   case ROVER_STOP:
+  //   speed = 0;
+  //     break;
 
-    default:
-      break;
-  }
+  //   case ROVER_FWD:
+  //     if(speed < 3) {
+  //       speed++;
+  //     }
+  //     break;
 
-  switch(speed)
-  {
-    case 1:
-      runRPM(100, 1.0, FWD);
-      break;
+  //   case ROVER_REV:
+  //     if(speed > -3) {
+  //       speed--;
+  //     }
+  //     break;
 
-    case 2:
-      runRPM(250, 1.0, FWD);
-      break;
+  //   default:
+  //     break;
+  // }
 
-    case 3:
-      runRPM(500, 1.0, FWD);
-      break;
+  // switch(speed)
+  // {
+  //   case 1:
+  //     runRPM(100, 1.0, FWD, -1);
+  //     break;
 
-    case -1:
-      runRPM(100, 1.0, REV);
-      break;
+  //   case 2:
+  //     runRPM(250, 1.0, FWD, -1);
+  //     break;
 
-    case -2:
-      runRPM(250, 1.0, REV);
-      break;
+  //   case 3:
+  //     runRPM(500, 1.0, FWD, -1);
+  //     break;
 
-    case -3:
-      runRPM(500, 1.0, REV);
-      break;
+  //   case -1:
+  //     runRPM(100, 1.0, REV, -1);
+  //     break;
 
-    default:
-      speed = 0;
-      break;
+  //   case -2:
+  //     runRPM(250, 1.0, REV, -1);
+  //     break;
 
-  }
+  //   case -3:
+  //     runRPM(500, 1.0, REV, -1);
+  //     break;
+
+  //   default:
+  //     speed = 0;
+  //     break;
+
+  // }
 
 }
