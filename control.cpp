@@ -136,7 +136,7 @@ long unsigned int getStepTime(unsigned int rpm)
 {
   if(rpm <= 0)
   {
-    return 4294967295;
+    return 4294967295; // no easy bind for UINT_MAX?
   }
 
   return (long unsigned int)( (60.0/(float)rpm * 1000000.0) /42);
@@ -144,7 +144,7 @@ long unsigned int getStepTime(unsigned int rpm)
 
 
 // this function is for more percise delays when you get over 15ms
-// delayMicroseconds is only accurate up to a few thousand, after this use milliseconds
+// delayMicroseconds() is only accurate up to a few thousand, after this use milliseconds
 void longDelayMicroseconds(unsigned long int microDelay)
 {
     if(microDelay > 1000)
@@ -159,6 +159,10 @@ void longDelayMicroseconds(unsigned long int microDelay)
   }
 }
 
+
+
+
+
 // pin > position table
 // 12  0
 // 10  1
@@ -167,9 +171,8 @@ void longDelayMicroseconds(unsigned long int microDelay)
 // 9   4
 // 7   5
 
-// note: this code is not very optimized, its just for testing rn
-// this sets the correct pin for the winding and polarity
-// supports two independent motor banks
+/*
+*/
 void step(int dir, int bank)
 {
   switch(dir)
@@ -180,56 +183,31 @@ void step(int dir, int bank)
       allLow(bank);
       break;
 
-    // ignore the hard coded values lo
+    // TODO: finish this and make it able to go both directions
     case 0:
       incrementPos(1, 0);
       incrementPos(-1, 1);
       allLow(-1);
     break;
 
-  }
+    // update the signal outputs of all banks
+    updateSignal(0);
+    updateSignal(1);
 
+  }
+}
+
+
+/*
+this sets the correct pin for the winding and polarity
+and updates the actual pin output of the arduino to reflect
+whatever the current "motorPosition" of whatever bank you give it
+expand this code if you want to support more banks
+*/
+void updateSignal(unsigned int bank) // does not support -1 (all banks)
+{
   switch(bank)
   {
-    case -1: // all banks
-      switch(motorPosition[bank])
-      {
-        case 0:
-          digitalWrite(12, HIGH);
-          digitalWrite(A5, HIGH);
-          digitalWrite(13, HIGH); // LED at the pos 0
-          break;
-        
-        case 1:
-          digitalWrite(10, HIGH);
-          digitalWrite(A3, HIGH);
-          break;
-
-        case 2:
-          digitalWrite(8, HIGH);
-          digitalWrite(A1, HIGH);
-          break;
-
-        case 3:
-          digitalWrite(11, HIGH);
-          digitalWrite(A4, HIGH);
-          break;
-
-        case 4:
-          digitalWrite(9, HIGH);
-          digitalWrite(A2, HIGH);
-          break;
-
-        case 5:
-          digitalWrite(7, HIGH);
-          digitalWrite(A0, HIGH);
-          break;
-
-        break;
-        
-      break;
-    }
-
     case 0: // original bank
       switch(motorPosition[bank])
       {
@@ -257,45 +235,40 @@ void step(int dir, int bank)
         case 5:
           digitalWrite(7, HIGH);
           break;
-      }
-    break;
-
+        }
+      break;
 
     // A0 = 7, A1 = 8, A2 = 9, A3 = 10, A4 = 11, A5 = 12
     case 1: // second bank
-        switch(motorPosition[bank])
-      {
-        case 0:
-          digitalWrite(A5, HIGH);
-          digitalWrite(13, HIGH); // LED at the pos 0
-          break;
-        
-        case 1:
-          digitalWrite(A3, HIGH);
-          break;
-
-        case 2:
-          digitalWrite(A1, HIGH);
-          break;
-
-        case 3:
-          digitalWrite(A4, HIGH);
-          break;
-
-        case 4:
-          digitalWrite(A2, HIGH);
-          break;
-
-        case 5:
-          digitalWrite(A0, HIGH);
-          break;
-
+      switch(motorPosition[bank])
+    {
+      case 0:
+        digitalWrite(A5, HIGH);
+        digitalWrite(13, HIGH); // LED at the pos 0
         break;
-      }
+      
+      case 1:
+        digitalWrite(A3, HIGH);
+        break;
 
+      case 2:
+        digitalWrite(A1, HIGH);
+        break;
 
-    default:
+      case 3:
+        digitalWrite(A4, HIGH);
+        break;
+
+      case 4:
+        digitalWrite(A2, HIGH);
+        break;
+
+      case 5:
+        digitalWrite(A0, HIGH);
+        break;
+
       break;
+    }
   }
 }
 
@@ -303,25 +276,23 @@ void step(int dir, int bank)
 
 // this changes the motor position by diff
 // looping within the range 0 - 6
-// this doesnt support overflow right now
+// supports a little overflow
 void incrementPos(int dir, int bank)
 {
   // i honestly forgot now i figured this math out, but it works
-  // its probably not fully optimized
   motorPosition[bank] += abs((6 + dir) % 6);
   // maybe motorPosition += abs((6 * diff) % 6);
   motorPosition[bank] = motorPosition[bank] % 6; // this supports the overflow
   //Serial.println(motorPosition);
 }
 
-// optimze this eventually?
-// we may need the clock cycles at super high RPMs
+
+// rewrite this code to be less wordy lol
 void allLow(int bank)
 {
   switch(bank)
   {
-        // all case
-    case -1:
+    case -1: // all
       digitalWrite(A0, LOW);
       digitalWrite(A1, LOW);
       digitalWrite(A2, LOW);

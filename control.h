@@ -3,10 +3,11 @@
 #define CONTROL_H
 
 // function prototypes
-void incrementPos(int diff);
-void step(int dir);
-void allLow();
-void runRPM(unsigned int rpm, float seconds, int dir);
+void incrementPos(int dir, int bank);
+void step(int dir, int bank);
+void updateSignal(unsigned int bank);
+void allLow(int bank);
+void runRPM(unsigned int rpm, float seconds, int dir, int bank);
 void stepRPM(unsigned int rpm, int numSteps, int dir);
 void longDelayMicroseconds(unsigned long int microDelay);
 void ramp(unsigned int startRPM, unsigned int finalRPM, int dir);
@@ -14,12 +15,13 @@ void ramp2(unsigned int startRPM, unsigned int finalRPM, int dir, unsigned int r
 long unsigned int getStepTime(unsigned int rpm);
 
 // variables
-extern int motorPosition;
+extern int motorPosition[];
 
 enum motor_dir
 {
   FWD = 1,
-  REV = -1
+  REV = -1,
+  SPIN = 0
 };
 
 // commands from the pi

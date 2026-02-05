@@ -128,7 +128,7 @@ void SpinDemo()
 {
     for(int i = 0; i < 6 * 7; i++)
   {
-    step(1);
+    step(1, 0);
     delay(24);
   }
 
@@ -143,7 +143,7 @@ void spinDemo2()
   int temp = 1;
   for(int i = 0; i < 6 * 7; i++)
   {
-    step(temp);
+    step(temp, 0);
     delay(5);
   }
 
@@ -157,7 +157,7 @@ void spinDemo2()
 //ramp to 3500 rpm test code
 void oldRampDemo()
 {
-    step(-1);
+  step(-1, 0);
   float mrs = 3000;
   delayMicroseconds(mrs);
   mrs--;
