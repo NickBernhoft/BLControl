@@ -8,10 +8,10 @@ void step(int dir, int bank);
 void updateSignal(unsigned int bank);
 void allLow(int bank);
 void runRPM(unsigned int rpm, float seconds, int dir, int bank);
-void stepRPM(unsigned int rpm, int numSteps, int dir);
+void stepRPM(unsigned int rpm, int numSteps, int dir, int bank);
 void longDelayMicroseconds(unsigned long int microDelay);
 void ramp(unsigned int startRPM, unsigned int finalRPM, int dir);
-void ramp2(unsigned int startRPM, unsigned int finalRPM, int dir, unsigned int rateIn);
+void ramp2(unsigned int startRPM, unsigned int finalRPM, int dir, unsigned int rateIn, int bank);
 long unsigned int getStepTime(unsigned int rpm);
 
 // variables

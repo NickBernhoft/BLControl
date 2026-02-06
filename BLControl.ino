@@ -55,9 +55,23 @@ void loop()
   // runRPM(3000, 10, FOWARD);
   // delay(5000);
 
-  runRPM(500, 5.0, SPIN, -1);
-  runRPM(500, 5.0, REV, -1);
-  // runRPM(500, 5.0, REV, 1);
+  
+
+  // for(int i = 0; i < 250; i++)
+  // {
+  //   step(1, 0);
+  //   step(1, 1);
+  //   delay(10);
+  // }
+
+  runRPM(500, 3.0, SPIN, 0);
+  runRPM(500, 3.0, SPIN, 1);
+  delay(1000);
+  runRPM(500, 1.0, FWD, 1);
+  runRPM(500, 1.0, FWD, 0);
+  delay (1000);
+  runRPM(500, 1.0, REV, 0);
+  runRPM(500, 1.0, REV, 1);
   delay(2000);
 
   // incoming_byte = Serial.read();

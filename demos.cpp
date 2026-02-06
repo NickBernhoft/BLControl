@@ -20,9 +20,9 @@ void rampDemo()
 
 void ramp2Demo()
 {
-  ramp2(0, 4500, REV, 10);
+  ramp2(0, 4500, REV, 10, 0);
   Serial.println("DOne");
-  ramp2(4500, 0, REV, 10);
+  ramp2(4500, 0, REV, 10, 1);
 
   delay(1000);
 }

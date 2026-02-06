@@ -4,9 +4,10 @@
 // global variables
 int motorPosition[2] = {0, 0}; // 0-5, there are 6 positions
 
-
+/*
 // runs the motor at a certain RPM for a certain amount of seconds
 // ints are unsigned bc RPM cannot be negative
+*/
 void runRPM(unsigned int rpm, float seconds, int dir, int bank)
 {
   // rmp to steps conversion:
@@ -16,7 +17,7 @@ void runRPM(unsigned int rpm, float seconds, int dir, int bank)
   // delay between steps in microseconds
   unsigned long microDelay = (seconds / (numRevs * 42)) * 1000000.0;
 
-  // ramp2(100, rpm, dir, 1);
+  ramp2(50, rpm, dir, 2, bank);
 
   for(int i = 0; i < numSteps; i++)
   {
@@ -26,8 +27,11 @@ void runRPM(unsigned int rpm, float seconds, int dir, int bank)
   }
 }
 
-// like runRPM() except it takes a certain number of steps in as an argument
-// ints are unsigned bc RPM cannot be negative
+
+/*
+like runRPM() except it takes a certain number of steps in as an argument
+ints are unsigned bc RPM cannot be negative
+*/
 void stepRPM(unsigned int rpm, int numSteps, int dir, int bank)
 {
   // delay between steps in microseconds
@@ -83,10 +87,12 @@ void ramp(unsigned int startRPM, unsigned int finalRPM, int dir, int bank)
 }
 
 
-
-// ints are unsigned bc RPM cannot be negative
-// rate is the number by which we reduce the RPM per revolution (rate = -10, rpm: 100, 90, 80, 70)
-void ramp2(unsigned int startRPM, unsigned int finalRPM, int dir, unsigned int rateIn)
+/*
+ints are unsigned bc RPM cannot be negative
+rate is the number by which we reduce the RPM per revolution (rate = -10, rpm: 100, 90, 80, 70)
+TODO: doesnt support 0 right now, doesnt run
+*/
+void ramp2(unsigned int startRPM, unsigned int finalRPM, int dir, unsigned int rateIn, int bank)
 {
   int currentRPM = startRPM;
   int diff = finalRPM - startRPM; // positave diff = increasing speed, negative meand decreasing
@@ -120,13 +126,13 @@ void ramp2(unsigned int startRPM, unsigned int finalRPM, int dir, unsigned int r
     }
 
     currentRPM += rate;
-    stepRPM(currentRPM, dwell, dir);
+    stepRPM(currentRPM, dwell, dir, bank);
 
     // Serial.println(currentRPM);
   }
 
   // by this point we should have >rate number of steps to make up for
-  stepRPM(finalRPM, dwell, dir);
+  stepRPM(finalRPM, dwell, dir, bank);
 
 }
 
@@ -172,29 +178,45 @@ void longDelayMicroseconds(unsigned long int microDelay)
 // 7   5
 
 /*
+steps banks foward, backward, or both (spin)
+changes the control signals / digital output pins as well
 */
-void step(int dir, int bank)
+void step(int dir, int bank) // does not accept negative bank number
 {
   switch(dir)
   {
-    case -1:
-    case 1:
+    case REV: // -1
+    case FWD: // 1
       incrementPos(dir, bank);
       allLow(bank);
       break;
 
-    // TODO: finish this and make it able to go both directions
-    case 0:
-      incrementPos(1, 0);
-      incrementPos(-1, 1);
+    // case for one bank going one direction, and the other bank going the opposite direction
+    // if the bank is 0, it will spin regularly, if the bank is 1 it till spin inverse
+    case SPIN: // 0
+      switch(bank)
+      {
+        case 0:
+          incrementPos(FWD, 0);
+          incrementPos(REV, 1);
+          break;
+        
+        case 1:
+          incrementPos(REV, 0);
+          incrementPos(FWD, 1);
+          break;
+      }
+
       allLow(-1);
     break;
 
-    // update the signal outputs of all banks
+    default:
+      break;
+  }
+
+  // update the signal outputs of all banks
     updateSignal(0);
     updateSignal(1);
-
-  }
 }
 
 
@@ -213,7 +235,7 @@ void updateSignal(unsigned int bank) // does not support -1 (all banks)
       {
         case 0:
           digitalWrite(12, HIGH);
-          digitalWrite(13, HIGH); // LED at the pos 0
+          digitalWrite(13, HIGH); // LED on at the pos 0
           break;
         
         case 1:
@@ -244,7 +266,7 @@ void updateSignal(unsigned int bank) // does not support -1 (all banks)
     {
       case 0:
         digitalWrite(A5, HIGH);
-        digitalWrite(13, HIGH); // LED at the pos 0
+        digitalWrite(13, HIGH); // LED on at the pos 0
         break;
       
       case 1:
@@ -266,7 +288,6 @@ void updateSignal(unsigned int bank) // does not support -1 (all banks)
       case 5:
         digitalWrite(A0, HIGH);
         break;
-
       break;
     }
   }
