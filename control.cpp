@@ -355,6 +355,7 @@ void incrementPos(int dir, int bank)
 
 // optimized version using bit masks
 // inline prevents branching to function and runs code directly for faster execution
+// Note: these bit masks are specific to the nano and would need to be updated to accomodate to a different type of arduino
 inline void allLow(int bank)
 {
   switch (bank)
