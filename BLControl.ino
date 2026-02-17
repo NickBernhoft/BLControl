@@ -48,90 +48,81 @@ int speed = 0;
 
 void loop()
 {
-  //demos and testing
-  // meglovania();
-  // ramp2(100, 20000, FWD, 1);
-  // ramp2(20000, 100, FWD, 3);
-  // runRPM(3000, 10, FOWARD);
-  // delay(5000);
+  // stepRPM(50, 1000, FWD, 0);
 
+  runRPM(500, 3.0, FWD, 0);
+  runRPM(100, 3.0, FWD, 0);
   
 
-  // for(int i = 0; i < 250; i++)
-  // {
-  //   step(1, 0);
-  //   step(1, 1);
-  //   delay(10);
-  // }
+  // run both directions demo
+  // runRPM(500, 3.0, SPIN, 0);
+  // runRPM(500, 3.0, SPIN, 1);
+  // delay(1000);
+  // runRPM(500, 1.0, FWD, 1);
+  // runRPM(500, 1.0, FWD, 0);
+  // delay (1000);
+  // runRPM(500, 1.0, REV, 0);
+  // runRPM(500, 1.0, REV, 1);
+  // delay(2000);
 
-  runRPM(500, 3.0, SPIN, 0);
-  runRPM(500, 3.0, SPIN, 1);
-  delay(1000);
-  runRPM(500, 1.0, FWD, 1);
-  runRPM(500, 1.0, FWD, 0);
-  delay (1000);
-  runRPM(500, 1.0, REV, 0);
-  runRPM(500, 1.0, REV, 1);
-  delay(2000);
+//   incoming_byte = Serial.read();
+//   Serial.println(incoming_byte);
 
-  // incoming_byte = Serial.read();
-  // Serial.println(incoming_byte);
+//   incoming_byte = ROVER_FWD;
 
-  // incoming_byte = ROVER_FWD;
+//   switch(incoming_byte)
+//   {
+//     case ROVER_HALT: // fallthrough
+//     case ROVER_STOP:
+//     speed = 0;
+//       break;
 
-  // switch(incoming_byte)
-  // {
-  //   case ROVER_HALT: // fallthrough
-  //   case ROVER_STOP:
-  //   speed = 0;
-  //     break;
+//     case ROVER_FWD:
+//       if(speed < 3) {
+//         speed++;
+//       }
+//       break;
 
-  //   case ROVER_FWD:
-  //     if(speed < 3) {
-  //       speed++;
-  //     }
-  //     break;
+//     case ROVER_REV:
+//       if(speed > -3) {
+//         speed--;
+//       }
+//       break;
 
-  //   case ROVER_REV:
-  //     if(speed > -3) {
-  //       speed--;
-  //     }
-  //     break;
+//     default:
+//       break;
+//   }
 
-  //   default:
-  //     break;
-  // }
+//   switch(speed)
+//   {
+//     case 1:
+//       runRPM(100, 1.0, FWD, -1);
+//       break;
 
-  // switch(speed)
-  // {
-  //   case 1:
-  //     runRPM(100, 1.0, FWD, -1);
-  //     break;
+//     case 2:
+//       runRPM(250, 1.0, FWD, -1);
+//       break;
 
-  //   case 2:
-  //     runRPM(250, 1.0, FWD, -1);
-  //     break;
+//     case 3:
+//       runRPM(500, 1.0, FWD, -1);
+//       break;
 
-  //   case 3:
-  //     runRPM(500, 1.0, FWD, -1);
-  //     break;
+//     case -1:
+//       runRPM(100, 1.0, REV, -1);
+//       break;
 
-  //   case -1:
-  //     runRPM(100, 1.0, REV, -1);
-  //     break;
+//     case -2:
+//       runRPM(250, 1.0, REV, -1);
+//       break;
 
-  //   case -2:
-  //     runRPM(250, 1.0, REV, -1);
-  //     break;
+//     case -3:
+//       runRPM(500, 1.0, REV, -1);
+//       break;
 
-  //   case -3:
-  //     runRPM(500, 1.0, REV, -1);
-  //     break;
+//     default:
+//       speed = 0;
+//       break;
 
-  //   default:
-  //     speed = 0;
-  //     break;
-
-  // }
+//   }
 
 }

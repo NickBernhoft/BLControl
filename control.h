@@ -16,6 +16,7 @@ long unsigned int getStepTime(unsigned int rpm);
 
 // variables
 extern int motorPosition[];
+extern unsigned int currentRPM;
 
 enum motor_dir
 {

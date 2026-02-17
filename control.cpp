@@ -3,6 +3,7 @@
 
 // global variables
 int motorPosition[2] = {0, 0}; // 0-5, there are 6 positions
+unsigned int currentRPM = 1;
 
 /*
 // runs the motor at a certain RPM for a certain amount of seconds
@@ -10,6 +11,7 @@ int motorPosition[2] = {0, 0}; // 0-5, there are 6 positions
 */
 void runRPM(unsigned int rpm, float seconds, int dir, int bank)
 {
+  // update global variable
   // rmp to steps conversion:
   float numRevs = rpm * (seconds/60.0);
   int numSteps = numRevs * 42.0;
@@ -17,7 +19,8 @@ void runRPM(unsigned int rpm, float seconds, int dir, int bank)
   // delay between steps in microseconds
   unsigned long microDelay = (seconds / (numRevs * 42)) * 1000000.0;
 
-  ramp2(50, rpm, dir, 2, bank);
+  ramp2(currentRPM, rpm, dir, 2, bank);
+  currentRPM = rpm;
 
   for(int i = 0; i < numSteps; i++)
   {
@@ -82,8 +85,6 @@ void ramp(unsigned int startRPM, unsigned int finalRPM, int dir, int bank)
 
     return;
   }
-
-
 }
 
 
