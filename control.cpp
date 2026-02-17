@@ -308,51 +308,72 @@ void incrementPos(int dir, int bank)
   //Serial.println(motorPosition);
 }
 
+// old all Low function 
+// void allLow(int bank)
+// {
+//   switch(bank)
+//   {
+//     case -1: // all
+//       digitalWrite(A0, LOW);
+//       digitalWrite(A1, LOW);
+//       digitalWrite(A2, LOW);
+//       digitalWrite(A3, LOW);
+//       digitalWrite(A4, LOW);
+//       digitalWrite(A5, LOW);
+//       digitalWrite(A6, LOW);
+//       digitalWrite(13, LOW);  // LED
+//       digitalWrite(12, LOW);
+//       digitalWrite(11, LOW);
+//       digitalWrite(10, LOW);
+//       digitalWrite(9, LOW);
+//       digitalWrite(8, LOW);
+//       digitalWrite(7, LOW);
+//       break;
 
-// rewrite this code to be less wordy lol
-void allLow(int bank)
+//     case 0:
+//       digitalWrite(13, LOW);  // LED
+//       digitalWrite(12, LOW);
+//       digitalWrite(11, LOW);
+//       digitalWrite(10, LOW);
+//       digitalWrite(9, LOW);
+//       digitalWrite(8, LOW);
+//       digitalWrite(7, LOW);
+//       break;
+
+//     case 1:
+//       digitalWrite(A0, LOW);  // LED
+//       digitalWrite(A1, LOW);
+//       digitalWrite(A2, LOW);
+//       digitalWrite(A3, LOW);
+//       digitalWrite(A4, LOW);
+//       digitalWrite(A5, LOW);
+//       break;
+
+//       default:
+//         break;
+//   }
+// }
+
+// optimized version using bit masks
+// inline prevents branching to function and runs code directly for faster execution
+// Note: these bit masks are specific to the nano and would need to be updated to accomodate to a different type of arduino
+inline void allLow(int bank)
 {
-  switch(bank)
+  switch (bank)
   {
-    case -1: // all
-      digitalWrite(A0, LOW);
-      digitalWrite(A1, LOW);
-      digitalWrite(A2, LOW);
-      digitalWrite(A3, LOW);
-      digitalWrite(A4, LOW);
-      digitalWrite(A5, LOW);
-      digitalWrite(A6, LOW);
-      digitalWrite(13, LOW);  // LED
-      digitalWrite(12, LOW);
-      digitalWrite(11, LOW);
-      digitalWrite(10, LOW);
-      digitalWrite(9, LOW);
-      digitalWrite(8, LOW);
-      digitalWrite(7, LOW);
+    case -1:  // ALL motors
+      PORTB &= ~0b00111111;   // D8–D13 LOW
+      PORTD &= ~(1 << 7);     // D7 LOW
+      PORTC &= ~0b00111111;   // A0–A5 LOW
       break;
 
-    case 0:
-      digitalWrite(13, LOW);  // LED
-      digitalWrite(12, LOW);
-      digitalWrite(11, LOW);
-      digitalWrite(10, LOW);
-      digitalWrite(9, LOW);
-      digitalWrite(8, LOW);
-      digitalWrite(7, LOW);
+    case 0:   // right motor only
+      PORTB &= ~0b00111111; // D8-D13
+      PORTD &= ~(1 << 7); // D7
       break;
 
-    case 1:
-      digitalWrite(A0, LOW);  // LED
-      digitalWrite(A1, LOW);
-      digitalWrite(A2, LOW);
-      digitalWrite(A3, LOW);
-      digitalWrite(A4, LOW);
-      digitalWrite(A5, LOW);
-      digitalWrite(A6, LOW);
+    case 1:   // left motor only
+      PORTC &= ~0b00111111; //A0-A5 LOW
       break;
-
-      default:
-        break;
   }
-
 }
