@@ -167,3 +167,14 @@ void oldRampDemo()
     mrs = 400;
   }
 }
+
+  // run both directions demo
+  // runRPM(500, 3.0, SPIN, 0);
+  // runRPM(500, 3.0, SPIN, 1);
+  // delay(1000);
+  // runRPM(500, 1.0, FWD, 1);
+  // runRPM(500, 1.0, FWD, 0);
+  // delay (1000);
+  // runRPM(500, 1.0, REV, 0);
+  // runRPM(500, 1.0, REV, 1);
+  // delay(2000);

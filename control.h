@@ -2,6 +2,8 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
+#define NUM_BANKS 2
+
 // function prototypes
 void incrementPos(int dir, int bank);
 void step(int dir, int bank);
@@ -17,6 +19,7 @@ long unsigned int getStepTime(unsigned int rpm);
 // variables
 extern int motorPosition[];
 extern unsigned int currentRPM;
+extern int currentDir;
 
 enum motor_dir
 {

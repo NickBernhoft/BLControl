@@ -50,8 +50,10 @@ void loop()
 {
   // stepRPM(50, 1000, FWD, 0);
 
-  runRPM(500, 3.0, FWD, 0);
-  runRPM(100, 3.0, FWD, 0);
+  runRPM(500, 3, FWD, 0);
+  runRPM(500, 3, REV, 0);
+  //delay(3000);
+
   
 
   // run both directions demo

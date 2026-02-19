@@ -4,6 +4,7 @@
 // global variables
 int motorPosition[2] = {0, 0}; // 0-5, there are 6 positions
 unsigned int currentRPM = 1;
+int currentDir = FWD;
 
 /*
 // runs the motor at a certain RPM for a certain amount of seconds
@@ -11,7 +12,15 @@ unsigned int currentRPM = 1;
 */
 void runRPM(unsigned int rpm, float seconds, int dir, int bank)
 {
-  // update global variable
+  // if switching direction, ramp down to low speed
+  if (currentDir != dir)
+  {
+    ramp2(currentRPM, 10, currentDir, 2, bank);
+    currentRPM = 10;
+  }
+
+  currentDir = dir; // update global variable
+
   // rmp to steps conversion:
   float numRevs = rpm * (seconds/60.0);
   int numSteps = numRevs * 42.0;
@@ -20,7 +29,7 @@ void runRPM(unsigned int rpm, float seconds, int dir, int bank)
   unsigned long microDelay = (seconds / (numRevs * 42)) * 1000000.0;
 
   ramp2(currentRPM, rpm, dir, 2, bank);
-  currentRPM = rpm;
+  currentRPM = rpm; // update global variable
 
   for(int i = 0; i < numSteps; i++)
   {
@@ -100,6 +109,11 @@ void ramp2(unsigned int startRPM, unsigned int finalRPM, int dir, unsigned int r
   int rate = rateIn;
   int dwell = 3; // number of steps to run a single RPM value before incrementing the RPM
 
+
+  if(diff == 0)
+  {
+    diff = 1;
+  }
 
   // if diff is negative, then reduce the speed
   if (diff < 0)
@@ -289,6 +303,10 @@ void updateSignal(unsigned int bank) // does not support -1 (all banks)
       case 5:
         digitalWrite(A0, HIGH);
         break;
+
+      default:
+        allLow(-1);
+        break;
       break;
     }
   }
@@ -305,7 +323,7 @@ void incrementPos(int dir, int bank)
   motorPosition[bank] += abs((6 + dir) % 6);
   // maybe motorPosition += abs((6 * diff) % 6);
   motorPosition[bank] = motorPosition[bank] % 6; // this supports the overflow
-  //Serial.println(motorPosition);
+  //Serial.println(motorPosition[0]);
 }
 
 // old all Low function 
