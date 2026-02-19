@@ -17,7 +17,7 @@
 #include "Music/music.h"
 #include "control.h"
 #include "demos.h"
-#include "Music/vengabus_motor.h"
+#include "Music/doom_motor.h"
 
 
 void setup()

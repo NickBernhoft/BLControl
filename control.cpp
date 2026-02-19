@@ -201,8 +201,17 @@ void step(int dir, int bank) // does not accept negative bank number
   {
     case REV: // -1
     case FWD: // 1
-      incrementPos(dir, bank);
-      allLow(bank);
+      if (bank == -1)
+      {
+        incrementPos(dir, 0);
+        incrementPos(dir, 1);
+        allLow(-1);
+      }
+      else
+      {
+        incrementPos(dir, bank);
+        allLow(bank);
+      }
       break;
 
     // case for one bank going one direction, and the other bank going the opposite direction
@@ -269,6 +278,11 @@ void updateSignal(unsigned int bank) // does not support -1 (all banks)
 // supports a little overflow
 void incrementPos(int dir, int bank)
 {
+  if (bank < 0 || bank > 1)
+  {
+    return;
+  }
+
   // i honestly forgot now i figured this math out, but it works
   motorPosition[bank] += abs((6 + dir) % 6);
   // maybe motorPosition += abs((6 * diff) % 6);
