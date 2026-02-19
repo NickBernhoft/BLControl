@@ -18,8 +18,8 @@ long unsigned int getStepTime(unsigned int rpm);
 
 // variables
 extern int motorPosition[];
-extern unsigned int currentRPM;
-extern int currentDir;
+extern unsigned int currentRPM][];
+extern int currentDir[];
 
 enum motor_dir
 {
@@ -35,7 +35,7 @@ enum COMMANDS {
   ROVER_REV = 0x02,
   ROVER_LEFT = 0x03,
   ROVER_RIGHT = 0x04,
-  ROVER_HALT = 0xff,
+  //ROVER_HALT = 0xff, // depricated
   ROVER_FRONT = 0x05,
   ROVER_BACK = 0x06,
   ROVER_RAISE = 0X07,

@@ -50,31 +50,23 @@ void loop()
 {
   // stepRPM(50, 1000, FWD, 0);
 
-  runRPM(500, 3, FWD, 0);
-  runRPM(500, 3, REV, 0);
-  //delay(3000);
+  // runRPM(500, 3, FWD, 0);
+  // runRPM(500, 3, REV, 0);
+  delay(3000);
 
   
 
-  // run both directions demo
-  // runRPM(500, 3.0, SPIN, 0);
-  // runRPM(500, 3.0, SPIN, 1);
-  // delay(1000);
-  // runRPM(500, 1.0, FWD, 1);
-  // runRPM(500, 1.0, FWD, 0);
-  // delay (1000);
-  // runRPM(500, 1.0, REV, 0);
-  // runRPM(500, 1.0, REV, 1);
-  // delay(2000);
+  incoming_byte = Serial.read();
+  Serial.println(incoming_byte);
 
-//   incoming_byte = Serial.read();
-//   Serial.println(incoming_byte);
 
-//   incoming_byte = ROVER_FWD;
+  // if(SerialByte != 255)
+  // {
+  //   runAll();
+  // }
 
 //   switch(incoming_byte)
 //   {
-//     case ROVER_HALT: // fallthrough
 //     case ROVER_STOP:
 //     speed = 0;
 //       break;

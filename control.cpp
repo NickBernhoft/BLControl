@@ -2,8 +2,8 @@
 #include "control.h"
 
 // global variables
-int motorPosition[2] = {0, 0}; // 0-5, there are 6 positions
-unsigned int currentRPM = 1;
+int motorPosition[NUM_BANKS] = {0}; // 0-5, there are 6 positions
+unsigned int currentRPM[NUM_BANKS] = {0};
 int currentDir = FWD;
 
 /*
@@ -38,6 +38,30 @@ void runRPM(unsigned int rpm, float seconds, int dir, int bank)
     longDelayMicroseconds(microDelay);
   }
 }
+
+
+
+
+
+
+
+
+// runs all banks at the specified speeds and directions in real time
+runAll()
+{
+  for(int i = 0; i < NUM_BANKS)
+  {
+    
+  }
+}
+
+
+
+
+
+
+
+
 
 
 /*
