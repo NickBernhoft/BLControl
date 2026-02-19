@@ -3,7 +3,7 @@
 #define DEMOS_H
 
 // function prototypes
-#include "music.h"
+#include "Music/music.h"
 #include "control.h"
 
 

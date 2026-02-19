@@ -1,0 +1,3 @@
+# Ignore MIDI source files
+*.mid
+*.midi

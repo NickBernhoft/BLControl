@@ -2,6 +2,8 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
+#include <Arduino.h>
+
 // function prototypes
 void incrementPos(int dir, int bank);
 void step(int dir, int bank);
@@ -13,6 +15,11 @@ void longDelayMicroseconds(unsigned long int microDelay);
 void ramp(unsigned int startRPM, unsigned int finalRPM, int dir);
 void ramp2(unsigned int startRPM, unsigned int finalRPM, int dir, unsigned int rateIn, int bank);
 long unsigned int getStepTime(unsigned int rpm);
+void initControlPins();
+
+extern const uint8_t LED_PIN;
+extern const uint8_t RIGHT_MOTOR_PINS[6];
+extern const uint8_t LEFT_MOTOR_PINS[6];
 
 // variables
 extern int motorPosition[];

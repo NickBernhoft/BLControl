@@ -3,6 +3,20 @@
 
 // global variables
 int motorPosition[2] = {0, 0}; // 0-5, there are 6 positions
+const uint8_t LED_PIN = 13;
+const uint8_t RIGHT_MOTOR_PINS[6] = {12, 10, 8, 11, 9, 7};
+const uint8_t LEFT_MOTOR_PINS[6] = {A5, A3, A1, A4, A2, A0};
+
+void initControlPins()
+{
+  pinMode(LED_PIN, OUTPUT);
+
+  for (int i = 0; i < 6; i++)
+  {
+    pinMode(RIGHT_MOTOR_PINS[i], OUTPUT);
+    pinMode(LEFT_MOTOR_PINS[i], OUTPUT);
+  }
+}
 
 /*
 // runs the motor at a certain RPM for a certain amount of seconds
@@ -231,65 +245,20 @@ void updateSignal(unsigned int bank) // does not support -1 (all banks)
   switch(bank)
   {
     case 0: // original bank
-      switch(motorPosition[bank])
+      digitalWrite(RIGHT_MOTOR_PINS[motorPosition[bank]], HIGH);
+      if(motorPosition[bank] == 0)
       {
-        case 0:
-          digitalWrite(12, HIGH);
-          digitalWrite(13, HIGH); // LED on at the pos 0
-          break;
-        
-        case 1:
-          digitalWrite(10, HIGH);
-          break;
-
-        case 2:
-          digitalWrite(8, HIGH);
-          break;
-
-        case 3:
-          digitalWrite(11, HIGH);
-          break;
-
-        case 4:
-          digitalWrite(9, HIGH);
-          break;
-
-        case 5:
-          digitalWrite(7, HIGH);
-          break;
-        }
+        digitalWrite(LED_PIN, HIGH); // LED on at the pos 0
+      }
       break;
 
-    // A0 = 7, A1 = 8, A2 = 9, A3 = 10, A4 = 11, A5 = 12
     case 1: // second bank
-      switch(motorPosition[bank])
-    {
-      case 0:
-        digitalWrite(A5, HIGH);
-        digitalWrite(13, HIGH); // LED on at the pos 0
-        break;
-      
-      case 1:
-        digitalWrite(A3, HIGH);
-        break;
-
-      case 2:
-        digitalWrite(A1, HIGH);
-        break;
-
-      case 3:
-        digitalWrite(A4, HIGH);
-        break;
-
-      case 4:
-        digitalWrite(A2, HIGH);
-        break;
-
-      case 5:
-        digitalWrite(A0, HIGH);
-        break;
+      digitalWrite(LEFT_MOTOR_PINS[motorPosition[bank]], HIGH);
+      if(motorPosition[bank] == 0)
+      {
+        digitalWrite(LED_PIN, HIGH); // LED on at the pos 0
+      }
       break;
-    }
   }
 }
 
@@ -355,9 +324,13 @@ void incrementPos(int dir, int bank)
 
 // optimized version using bit masks
 // inline prevents branching to function and runs code directly for faster execution
-// Note: these bit masks are specific to the nano and would need to be updated to accomodate to a different type of arduino
+// Board-specific fast paths:
+// - Nano/Uno (ATmega328P)
+// - Mega 2560 (ATmega2560)
+// Fallback uses digitalWrite for portability.
 inline void allLow(int bank)
 {
+#if defined(__AVR_ATmega328P__)
   switch (bank)
   {
     case -1:  // ALL motors
@@ -375,4 +348,52 @@ inline void allLow(int bank)
       PORTC &= ~0b00111111; //A0-A5 LOW
       break;
   }
+
+#elif defined(__AVR_ATmega2560__)
+  switch (bank)
+  {
+    case -1:  // ALL motors
+      PORTB &= ~0b11110000;   // D10-D13 LOW (PB4-PB7)
+      PORTH &= ~0b01110000;   // D7-D9 LOW (PH4-PH6)
+      PORTF &= ~0b00111111;   // A0-A5 LOW (PF0-PF5)
+      break;
+
+    case 0:   // right motor only (D7-D13)
+      PORTB &= ~0b11110000;   // D10-D13
+      PORTH &= ~0b01110000;   // D7-D9
+      break;
+
+    case 1:   // left motor only (A0-A5)
+      PORTF &= ~0b00111111;
+      break;
+  }
+
+#else
+  switch (bank)
+  {
+    case -1:
+      for (int i = 0; i < 6; i++)
+      {
+        digitalWrite(LEFT_MOTOR_PINS[i], LOW);
+        digitalWrite(RIGHT_MOTOR_PINS[i], LOW);
+      }
+      digitalWrite(LED_PIN, LOW);
+      break;
+
+    case 0:
+      for (int i = 0; i < 6; i++)
+      {
+        digitalWrite(RIGHT_MOTOR_PINS[i], LOW);
+      }
+      digitalWrite(LED_PIN, LOW);
+      break;
+
+    case 1:
+      for (int i = 0; i < 6; i++)
+      {
+        digitalWrite(LEFT_MOTOR_PINS[i], LOW);
+      }
+      break;
+  }
+#endif
 }
