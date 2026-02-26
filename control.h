@@ -2,8 +2,8 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#define NUM_BANKS 2   // number of controllers
-#define NUM_STEPS 42    // number of steps per revolution, could vary per motor
+#define NUM_BANKS 2   // number of independent controllers
+#define NUM_STEPS 21    // number of steps per revolution, could vary per motor
 
 // function prototypes
 void incrementPos(int dir, int bank);

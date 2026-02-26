@@ -1,7 +1,6 @@
 // hardware notes:
-// 6 steps in a full rotation of the windings
 // 7 rotations per revolution
-// 6 * 7 = 42 steps per rotation
+// 6 * 7 = 21 steps per rotation
 // 360 / 42 = 8.5714 degrees per step = 0.1496 radians per step
 
 // testing notes:

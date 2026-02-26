@@ -65,15 +65,6 @@ inline void setNextStep(int bank)
 
 
 
-
-
-
-
-
-
-
-
-
 /*
 // runs the motor at a certain RPM for a certain amount of seconds
 // ints are unsigned bc RPM cannot be negative
@@ -91,10 +82,10 @@ void runRPM(unsigned int rpm, float seconds, int dir, int bank)
 
   // rmp to steps conversion:
   float numRevs = rpm * (seconds/60.0);
-  int numSteps = numRevs * 42.0;
+  int numSteps = numRevs * (float)NUM_STEPS;
   
   // delay between steps in microseconds
-  unsigned long microDelay = (seconds / (numRevs * 42)) * 1000000.0;
+  unsigned long microDelay = (seconds / (numRevs * NUM_STEPS)) * 1000000.0;
 
   ramp2(currentRPM, rpm, dir, 2, bank);
   currentRPM[bank] = rpm; // update global variable
@@ -117,7 +108,7 @@ ints are unsigned bc RPM cannot be negative
 void stepRPM(unsigned int rpm, int numSteps, int dir, int bank)
 {
   // delay between steps in microseconds
-  unsigned long microDelay = (((60.0/rpm) * 1000000.0) / 42.0);
+  unsigned long microDelay = (((60.0/rpm) * 1000000.0) / (float)NUM_STEPS);
 
   for(int i = 0; i < numSteps; i++)
   {
@@ -230,7 +221,7 @@ long unsigned int getStepTime(unsigned int rpm)
     return 4294967295; // no easy bind for UINT_MAX?
   }
 
-  return (long unsigned int)( (60.0/(float)rpm * 1000000.0) /42);
+  return (long unsigned int)( (60.0/(float)rpm * 1000000.0) / (float)NUM_STEPS);
 }
 
 
@@ -252,16 +243,6 @@ void longDelayMicroseconds(unsigned long int microDelay)
 
 
 
-
-
-// pin > position table
-// 12  0
-// 10  1
-// 8   2
-// 11  3
-// 9   4
-// 7   5
-
 /*
 steps banks foward, backward, or both (spin)
 changes the control signals / digital output pins as well
@@ -278,6 +259,7 @@ void step(int dir, int bank) // does not accept negative bank number
 
     // case for one bank going one direction, and the other bank going the opposite direction
     // if the bank is 0, it will spin regularly, if the bank is 1 it till spin inverse
+    // this will not be executed in scheduled
     case SPIN: // 0
       switch(bank)
       {
@@ -313,7 +295,7 @@ void updateSignal(unsigned int bank) // does not support -1 (all banks)
 {
   switch(bank)
   {
-    case 0: // original bank
+    case 0: // original bank uses pins 10, 11, and 12
       switch(motorPosition[bank])
       {
         case 0:
@@ -328,52 +310,22 @@ void updateSignal(unsigned int bank) // does not support -1 (all banks)
         case 2:
           digitalWrite(8, HIGH);
           break;
-
-        case 3:
-          digitalWrite(11, HIGH);
-          break;
-
-        case 4:
-          digitalWrite(9, HIGH);
-          break;
-
-        case 5:
-          digitalWrite(7, HIGH);
-          break;
         }
       break;
 
-    // A0 = 7, A1 = 8, A2 = 9, A3 = 10, A4 = 11, A5 = 12
-    case 1: // second bank
+    case 1: // second bank uses pins 7, 8, and 9
       switch(motorPosition[bank])
     {
       case 0:
-        digitalWrite(A5, HIGH);
-        digitalWrite(13, HIGH); // LED on at the pos 0
+        digitalWrite(7, HIGH);
         break;
       
       case 1:
-        digitalWrite(A3, HIGH);
+        digitalWrite(8, HIGH);
         break;
 
       case 2:
-        digitalWrite(A1, HIGH);
-        break;
-
-      case 3:
-        digitalWrite(A4, HIGH);
-        break;
-
-      case 4:
-        digitalWrite(A2, HIGH);
-        break;
-
-      case 5:
-        digitalWrite(A0, HIGH);
-        break;
-
-      default:
-        allLow(-1);
+        digitalWrite(9, HIGH);
         break;
       break;
     }
@@ -388,73 +340,31 @@ void updateSignal(unsigned int bank) // does not support -1 (all banks)
 void incrementPos(int dir, int bank)
 {
   // i honestly forgot now i figured this math out, but it works
-  motorPosition[bank] += abs((6 + dir) % 6);
-  // maybe motorPosition += abs((6 * diff) % 6);
-  motorPosition[bank] = motorPosition[bank] % 6; // this supports the overflow
+  motorPosition[bank] += abs((3 + dir) % 3);
+  motorPosition[bank] = motorPosition[bank] % 3; // this supports the overflow on upj to three for some
   //Serial.println(motorPosition[0]);
 }
 
-// old all Low function 
-// void allLow(int bank)
-// {
-//   switch(bank)
-//   {
-//     case -1: // all
-//       digitalWrite(A0, LOW);
-//       digitalWrite(A1, LOW);
-//       digitalWrite(A2, LOW);
-//       digitalWrite(A3, LOW);
-//       digitalWrite(A4, LOW);
-//       digitalWrite(A5, LOW);
-//       digitalWrite(13, LOW);  // LED
-//       digitalWrite(12, LOW);
-//       digitalWrite(11, LOW);
-//       digitalWrite(10, LOW);
-//       digitalWrite(9, LOW);
-//       digitalWrite(8, LOW);
-//       digitalWrite(7, LOW);
-//       break;
 
-//     case 0:
-//       digitalWrite(13, LOW);  // LED
-//       digitalWrite(12, LOW);
-//       digitalWrite(11, LOW);
-//       digitalWrite(10, LOW);
-//       digitalWrite(9, LOW);
-//       digitalWrite(8, LOW);
-//       digitalWrite(7, LOW);
-//       break;
-
-//     case 1:
-//       digitalWrite(A0, LOW);  // LED
-//       digitalWrite(A1, LOW);
-//       digitalWrite(A2, LOW);
-//       digitalWrite(A3, LOW);
-//       digitalWrite(A4, LOW);
-//       digitalWrite(A5, LOW);
-//       break;
-
-//       default:
-//         break;
-//   }
-// }
-
-// optimized version using bit masks
-// inline prevents branching to function and runs code directly for faster execution
-// Note: these bit masks are specific to the nano and would need to be updated to accomodate to a different type of arduino
+// TODO: update this for the new controller
+/*
+optimized version using bit masks
+inline prevents branching to function and runs code directly for faster execution
+Note: these bit masks are specific to the nano and would need to be updated to accomodate to a different type of arduino
+*/ 
 inline void allLow(int bank)
 {
   switch (bank)
   {
     case -1:  // ALL motors
-      PORTB &= ~0b00111111;   // D8–D13 LOW
-      PORTD &= ~(1 << 7);     // D7 LOW
+      PORTB &= ~0b00001111;   // D10–D13 LOW
+      //PORTD &= ~(1 << 7);     // D7 LOW
       PORTC &= ~0b00111111;   // A0–A5 LOW
       break;
 
     case 0:   // right motor only
-      PORTB &= ~0b00111111; // D8-D13
-      PORTD &= ~(1 << 7); // D7
+      PORTB &= ~0b00001111; // D10-D13
+      //PORTD &= ~(1 << 7); // D7
       break;
 
     case 1:   // left motor only
