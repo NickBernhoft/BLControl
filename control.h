@@ -2,7 +2,8 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#define NUM_BANKS 2
+#define NUM_BANKS 2   // number of controllers
+#define NUM_STEPS 42    // number of steps per revolution, could vary per motor
 
 // function prototypes
 void incrementPos(int dir, int bank);
@@ -15,11 +16,18 @@ void longDelayMicroseconds(unsigned long int microDelay);
 void ramp(unsigned int startRPM, unsigned int finalRPM, int dir);
 void ramp2(unsigned int startRPM, unsigned int finalRPM, int dir, unsigned int rateIn, int bank);
 long unsigned int getStepTime(unsigned int rpm);
+void updateBank(int bank, unsigned int rpm, int dir);
+inline void setNextStep(int bank);
+void runAll();
 
 // variables
 extern int motorPosition[];
-extern unsigned int currentRPM][];
+extern unsigned int currentRPM[];
+extern unsigned long currentDelay[];
 extern int currentDir[];
+extern unsigned long nextStep[];
+
+extern unsigned long time;
 
 enum motor_dir
 {

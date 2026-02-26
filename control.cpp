@@ -4,7 +4,75 @@
 // global variables
 int motorPosition[NUM_BANKS] = {0}; // 0-5, there are 6 positions
 unsigned int currentRPM[NUM_BANKS] = {0};
-int currentDir = FWD;
+unsigned long currentDelay[NUM_BANKS] = {0}; // time between steps to achieve currentRPM
+int currentDir[NUM_BANKS] = {FWD};
+unsigned long nextStep[NUM_BANKS];            // time that the next step should take place
+
+unsigned long time; // program time from micros()
+
+
+/*
+runs all banks at the specified speeds and directions in real time
+run a step for any overdue bank
+
+This function assumes it is executed instantly in terms of timing.
+there will be a very minor loss of time percision so actual RPM may vary slightly
+
+TODO: make sure to keep track of Micros as it overflows to 0 every 70 min
+*/
+void runAll()
+{
+  time = micros(); // set time
+
+  // scan for an overdue step in all banks
+  for(int i = 0; i < NUM_BANKS; i++)
+  {
+    if (nextStep[i] < time)
+    {
+      step(currentDir[i], i);
+      setNextStep(i);
+    }
+  }
+}
+
+/*
+updates the currentRPM and currentDelay
+generating the delay once and referencing is much faster
+*/
+void updateBank(int bank, unsigned int rpm, int dir)
+{
+  currentRPM[bank] = rpm;
+  currentDir[bank] = dir;
+  currentDelay[bank] = getStepTime(rpm);
+}
+
+/*
+calculated the time (micros) that the next step should take place
+for a certain bank
+
+takes the current time and adds the step Delay to it
+this should be called after every step a motor takes
+*/
+inline void setNextStep(int bank)
+{
+  // this will overflow automatically
+  //nextStep[bank] = micros() + currentDelay[bank];
+  nextStep[bank] = time + currentDelay[bank];
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 // runs the motor at a certain RPM for a certain amount of seconds
@@ -15,11 +83,11 @@ void runRPM(unsigned int rpm, float seconds, int dir, int bank)
   // if switching direction, ramp down to low speed
   if (currentDir != dir)
   {
-    ramp2(currentRPM, 10, currentDir, 2, bank);
-    currentRPM = 10;
+    ramp2(currentRPM[bank], 10, currentDir[bank], 2, bank);
+    currentRPM[bank] = 10;
   }
 
-  currentDir = dir; // update global variable
+  currentDir[bank] = dir; // update global variable
 
   // rmp to steps conversion:
   float numRevs = rpm * (seconds/60.0);
@@ -29,7 +97,7 @@ void runRPM(unsigned int rpm, float seconds, int dir, int bank)
   unsigned long microDelay = (seconds / (numRevs * 42)) * 1000000.0;
 
   ramp2(currentRPM, rpm, dir, 2, bank);
-  currentRPM = rpm; // update global variable
+  currentRPM[bank] = rpm; // update global variable
 
   for(int i = 0; i < numSteps; i++)
   {
@@ -38,28 +106,6 @@ void runRPM(unsigned int rpm, float seconds, int dir, int bank)
     longDelayMicroseconds(microDelay);
   }
 }
-
-
-
-
-
-
-
-
-// runs all banks at the specified speeds and directions in real time
-runAll()
-{
-  for(int i = 0; i < NUM_BANKS)
-  {
-    
-  }
-}
-
-
-
-
-
-
 
 
 
@@ -252,8 +298,6 @@ void step(int dir, int bank) // does not accept negative bank number
     default:
       break;
   }
-
-  // update the signal outputs of all banks
     updateSignal(0);
     updateSignal(1);
 }
@@ -362,7 +406,6 @@ void incrementPos(int dir, int bank)
 //       digitalWrite(A3, LOW);
 //       digitalWrite(A4, LOW);
 //       digitalWrite(A5, LOW);
-//       digitalWrite(A6, LOW);
 //       digitalWrite(13, LOW);  // LED
 //       digitalWrite(12, LOW);
 //       digitalWrite(11, LOW);

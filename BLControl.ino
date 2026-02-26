@@ -46,77 +46,23 @@ void setup()
 byte incoming_byte = 255;
 int speed = 0;
 
+
+
 void loop()
-{
-  // stepRPM(50, 1000, FWD, 0);
-
-  // runRPM(500, 3, FWD, 0);
-  // runRPM(500, 3, REV, 0);
-  delay(3000);
-
+{  
   
-
   incoming_byte = Serial.read();
-  Serial.println(incoming_byte);
+  //updateBank(0, 200, REV);
+  updateBank(1, 200, REV);
 
-
-  // if(SerialByte != 255)
-  // {
-  //   runAll();
-  // }
-
-//   switch(incoming_byte)
-//   {
-//     case ROVER_STOP:
-//     speed = 0;
-//       break;
-
-//     case ROVER_FWD:
-//       if(speed < 3) {
-//         speed++;
-//       }
-//       break;
-
-//     case ROVER_REV:
-//       if(speed > -3) {
-//         speed--;
-//       }
-//       break;
-
-//     default:
-//       break;
-//   }
-
-//   switch(speed)
-//   {
-//     case 1:
-//       runRPM(100, 1.0, FWD, -1);
-//       break;
-
-//     case 2:
-//       runRPM(250, 1.0, FWD, -1);
-//       break;
-
-//     case 3:
-//       runRPM(500, 1.0, FWD, -1);
-//       break;
-
-//     case -1:
-//       runRPM(100, 1.0, REV, -1);
-//       break;
-
-//     case -2:
-//       runRPM(250, 1.0, REV, -1);
-//       break;
-
-//     case -3:
-//       runRPM(500, 1.0, REV, -1);
-//       break;
-
-//     default:
-//       speed = 0;
-//       break;
-
-//   }
+  if(incoming_byte == 255)
+  {
+    runAll();
+  }
+  else 
+  {
+    // control logic here
+    Serial.println(incoming_byte);
+  }
 
 }
