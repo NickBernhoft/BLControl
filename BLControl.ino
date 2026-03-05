@@ -13,6 +13,9 @@
 // TODO
 // make the rate for ramp() customisable
 
+/*
+------------------------------------------------OLD CONTROL CODE--------------------------------------------------------------------------------------
+
 #include "music.h"
 #include "control.h"
 #include "demos.h"
@@ -64,4 +67,59 @@ void loop()
     Serial.println(incoming_byte);
   }
 
+}
+
+
+-----------------------------------------------OLD CONTROL CODE-------------------------------------------------------------
+*/
+
+#include <SimpleFOC.h>
+
+#define POLE_PAIRS 7
+
+BLDCMotor motor(POLE_PAIRS);
+BLDCDriver3PWM driver(9, 10, 11, 8);
+
+float target_angle = 0.0;
+float step_size = 0.25;   // radians per step
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(8, OUTPUT);
+  digitalWrite(8, HIGH);
+
+  driver.voltage_power_supply = 12;
+  driver.voltage_limit = 8;
+  driver.pwm_frequency = 20000;
+  driver.init();
+
+  motor.linkDriver(&driver);
+
+  // stepper like mode
+  motor.controller = MotionControlType::angle_openloop;
+
+  motor.voltage_limit = 8;
+
+  motor.init();
+  motor.enable();
+
+  Serial.println("Motor ready");
+}
+
+void loop() {
+
+  motor.loopFOC();
+  motor.move(target_angle);
+
+  // step every second
+  static unsigned long last_step = 0;
+
+  if (millis() - last_step > 100) {
+    target_angle += step_size;
+    last_step = millis();
+
+    Serial.print("Target angle: ");
+    Serial.println(target_angle);
+  }
 }
