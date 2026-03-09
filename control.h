@@ -19,6 +19,7 @@ long unsigned int getStepTime(unsigned int rpm);
 void updateBank(int bank, unsigned int rpm, int dir);
 inline void setNextStep(int bank);
 void runAll();
+float radstoRPM(float rads);
 
 // variables
 extern int motorPosition[];

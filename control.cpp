@@ -372,3 +372,18 @@ inline void allLow(int bank)
       break;
   }
 }
+
+/*
+converts radians per second to RPM
+*/
+float radstoRPM(float rads)
+{
+  // multiple by a static factor for performance
+  return rads * (float)9.5492965855137;
+}
+
+float RPMtoRads(float rpm)
+{
+  // multiple by a static factor for performance
+  return rpm / (float)9.5492965855137;
+}

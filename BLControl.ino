@@ -74,14 +74,20 @@ void loop()
 */
 
 #include <SimpleFOC.h>
+#include "control.h"
 
 #define POLE_PAIRS 7
+#define NUM_SPEEDS 3  // number of motor speeds. 3 foward, 3 backwards
 
 BLDCMotor motor(POLE_PAIRS);
 BLDCDriver3PWM driver(9, 10, 11, 8);
 
 float target_angle = 0.0;
 float step_size = 0.25;   // radians per step
+float target_velocity = 0.0; // radians per second
+
+byte incoming_byte = 255;
+int rover_speed[2] = {0, 0}; // positave fo
 
 void setup() {
   Serial.begin(115200);
@@ -97,7 +103,7 @@ void setup() {
   motor.linkDriver(&driver);
 
   // stepper like mode
-  motor.controller = MotionControlType::angle_openloop;
+  motor.controller = MotionControlType::velocity_openloop;
 
   motor.voltage_limit = 8;
 
@@ -110,16 +116,47 @@ void setup() {
 void loop() {
 
   motor.loopFOC();
-  motor.move(target_angle);
+  motor.move(target_velocity);
 
-  // step every second
-  static unsigned long last_step = 0;
+  incoming_byte = Serial.read();
 
-  if (millis() - last_step > 100) {
-    target_angle += step_size;
-    last_step = millis();
+  // movment logic
+  switch(incoming_byte)
+  {
+    case ROVER_STOP:
+      rover_speed[0] = 0;
+      rover_speed[1] = 0;
+      break;
 
-    Serial.print("Target angle: ");
-    Serial.println(target_angle);
+    case ROVER_FWD:
+      rover_speed[0]++;
+      rover_speed[1]++;
+      break;
+
+    case ROVER_REV:
+      rover_speed[0]--;
+      rover_speed[1]--;
+      break;
+
+    case ROVER_LEFT:
+      rover_speed[0]--;
+      rover_speed[1]++;
+      break;
+
+    case ROVER_RIGHT:
+      rover_speed[0]++;
+      rover_speed[1]--;
+      break;
   }
+
+  // add some code reducing the voltage on holding / speed = 0?
+
+  // clamp the max speed between -3 and 3
+  //rover_speed = min(max(rover_speed, NUM_SPEEDS * -1), NUM_SPEEDS);
+
+  //target_velocity[0] = RPMtoRads(200 * rover_speed);
+  //target_velocity[1] = RPMtoRads(200 * rover_speed);
+
+
+
 }
