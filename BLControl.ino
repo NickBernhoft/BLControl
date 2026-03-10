@@ -8,9 +8,12 @@ BLDCDriver3PWM driver(9, 10, 11, 8);
 
 float target_angle = 0.0;
 float step_size = 0.25;   // radians per step
-float target_velocity[2] = {0.0}; // radians per second
+float target_velocity[2] = {0.0}; // radians per second (actual, ramped)
+float desired_velocity[2] = {0.0}; // radians per second (commanded)
 
-byte incoming_byte = 255;
+#define RAMP_RATE 0.005 // rad/s per FOC loop iteration (runs LOOP_DUTY_CYCLE times per outer loop)
+
+byte incoming_byte = 255;s
 int rover_speed[2] = {0}; // positive for clockwise
 
 void setup() {
@@ -42,6 +45,12 @@ void loop() {
   
   for(int i = 0; i < LOOP_DUTY_CYCLE; i++)
   {
+    // ramp target_velocity toward desired_velocity each FOC iteration
+    float diff = desired_velocity[0] - target_velocity[0];
+    if(diff > RAMP_RATE)       target_velocity[0] += RAMP_RATE;
+    else if(diff < -RAMP_RATE) target_velocity[0] -= RAMP_RATE;
+    else                       target_velocity[0] = desired_velocity[0];
+
     motor.loopFOC();
     motor.move(target_velocity[0]);
   }
@@ -58,6 +67,12 @@ void loop() {
 
 
   // movment logic
+  // ROVER_STOP = 0x00,
+  // ROVER_FWD = 0x01,
+  // ROVER_REV = 0x02,
+  // ROVER_LEFT = 0x03,
+  // ROVER_RIGHT = 0x04,
+  
   incoming_byte = Serial.read();
   switch(incoming_byte)
   {
@@ -104,9 +119,10 @@ void loop() {
   for(int i = 0; i < NUM_BANKS; i++)
   {
     rover_speed[i] = clamp(rover_speed[i], NUM_SPEEDS * -1, NUM_SPEEDS);
-    target_velocity[i] = RPMtoRads(RPM_MULT * rover_speed[i]);
+    desired_velocity[i] = RPMtoRads(RPM_MULT * rover_speed[i]);
   }
 
-  // super basic dynamic voltage
-  driver.voltage_limit = 6 + (2 * abs(rover_speed[0]));
+  // dynamic voltage scaled to actual ramped speed
+  float actual_rpm = abs(radstoRPM(target_velocity[0]));
+  driver.voltage_limit = 6 + (2.0 * actual_rpm / RPM_MULT);
 }
