@@ -13,7 +13,7 @@ float desired_velocity[2] = {0.0}; // radians per second (commanded)
 
 #define RAMP_RATE 0.005 // rad/s per FOC loop iteration (runs LOOP_DUTY_CYCLE times per outer loop)
 
-byte incoming_byte = 255;s
+byte incoming_byte = 255;
 int rover_speed[2] = {0}; // positive for clockwise
 
 void setup() {
