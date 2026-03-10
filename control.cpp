@@ -384,6 +384,11 @@ float radstoRPM(float rads)
 
 float RPMtoRads(float rpm)
 {
-  // multiple by a static factor for performance
+  // divide by a static factor for performance
   return rpm / (float)9.5492965855137;
+}
+
+int clamp(int)
+{
+
 }

@@ -20,6 +20,7 @@ void updateBank(int bank, unsigned int rpm, int dir);
 inline void setNextStep(int bank);
 void runAll();
 float radstoRPM(float rads);
+float RPMtoRads(float rpm);
 
 // variables
 extern int motorPosition[];

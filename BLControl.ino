@@ -78,16 +78,17 @@ void loop()
 
 #define POLE_PAIRS 7
 #define NUM_SPEEDS 3  // number of motor speeds. 3 foward, 3 backwards
+#define LOOP_DUTY_CYCLE 1000 // ratio between motor movment CPU time and input checking CPU time (10000 : 1)
 
 BLDCMotor motor(POLE_PAIRS);
 BLDCDriver3PWM driver(9, 10, 11, 8);
 
 float target_angle = 0.0;
 float step_size = 0.25;   // radians per step
-float target_velocity = 0.0; // radians per second
+float target_velocity[2] = {1.0}; // radians per second
 
 byte incoming_byte = 255;
-int rover_speed[2] = {0, 0}; // positave fo
+int rover_speed[2] = {0}; // positave for clockwise
 
 void setup() {
   Serial.begin(115200);
@@ -115,47 +116,72 @@ void setup() {
 
 void loop() {
 
-  motor.loopFOC();
-  motor.move(target_velocity);
-
-  incoming_byte = Serial.read();
-
-  // movment logic
-  switch(incoming_byte)
+  
+  for(int i = 0; i < LOOP_DUTY_CYCLE; i++)
   {
-    case ROVER_STOP:
-      rover_speed[0] = 0;
-      rover_speed[1] = 0;
-      break;
+    motor.loopFOC();
+    motor.move(target_velocity[0]);
 
-    case ROVER_FWD:
-      rover_speed[0]++;
-      rover_speed[1]++;
-      break;
+    incoming_byte = Serial.read();
 
-    case ROVER_REV:
-      rover_speed[0]--;
-      rover_speed[1]--;
-      break;
+    // movment logic
+    switch(incoming_byte)
+    {
+      case 's':
+      case ROVER_STOP:
+        rover_speed[0] = 0;
+        rover_speed[1] = 0;
+        Serial.println("ROVER_STOP");
+        break;
 
-    case ROVER_LEFT:
-      rover_speed[0]--;
-      rover_speed[1]++;
-      break;
+      case 'f':
+      case ROVER_FWD:
+        rover_speed[0]++;
+        rover_speed[1]++;
+        Serial.println("ROVER_FWD");
+        break;
 
-    case ROVER_RIGHT:
-      rover_speed[0]++;
-      rover_speed[1]--;
-      break;
+      case 'r':
+      case ROVER_REV:
+        rover_speed[0]--;
+        rover_speed[1]--;
+        Serial.println("ROVER_REV");
+        break;
+      
+      case 'l':
+      case ROVER_LEFT:
+        rover_speed[0]--;
+        rover_speed[1]++;
+        Serial.println("ROVER_LEFT");
+        break;
+
+      case 'k': // k bc its next to l
+      case ROVER_RIGHT:
+        rover_speed[0]++;
+        rover_speed[1]--;
+        Serial.println("ROVER_RIGHT");
+        break;
+    }
   }
+
+  
 
   // add some code reducing the voltage on holding / speed = 0?
 
-  // clamp the max speed between -3 and 3
-  //rover_speed = min(max(rover_speed, NUM_SPEEDS * -1), NUM_SPEEDS);
+  // note: using constrain() is super slow for some reason.
+  rover_speed[0] = min(rover_speed[0], NUM_SPEEDS);
+  rover_speed[0] = max(rover_speed[0], NUM_SPEEDS * -1);
 
-  //target_velocity[0] = RPMtoRads(200 * rover_speed);
-  //target_velocity[1] = RPMtoRads(200 * rover_speed);
+  rover_speed[1] = min(rover_speed[1], NUM_SPEEDS);
+  rover_speed[1] = max(rover_speed[1], NUM_SPEEDS * -1);
+
+  target_velocity[0] = RPMtoRads(200 * rover_speed[0]);
+  target_velocity[1] = RPMtoRads(200 * rover_speed[1]);
+
+  Serial.print("Rover Speeds: ");
+  Serial.print(rover_speed[0]);
+  Serial.print(", ");
+  Serial.println(rover_speed[1]);
 
 
 
