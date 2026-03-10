@@ -3,15 +3,18 @@
 
 #define POLE_PAIRS 7
 
+// Motor on 3-PWM pins 9/10/11; enable pin 8
 BLDCMotor motor(POLE_PAIRS);
 BLDCDriver3PWM driver(9, 10, 11, 8);
 
+// Unused — retained for future angle-control mode
 float target_angle = 0.0;
 float step_size = 0.25;   // radians per step
-float target_velocity[2] = {0.0}; // radians per second
 
-byte incoming_byte = 255;
-int rover_speed[2] = {0}; // positive for clockwise
+float target_velocity[2] = {0.0}; // radians per second, per bank
+
+byte incoming_byte = 255;         // 255 = no byte (Serial.read() returns -1 cast to byte)
+int rover_speed[2] = {0};         // integer speed level [-NUM_SPEEDS, NUM_SPEEDS], positive = clockwise
 
 void setup() {
   Serial.begin(115200);
@@ -107,6 +110,6 @@ void loop() {
     target_velocity[i] = RPMtoRads(RPM_MULT * rover_speed[i]);
   }
 
-  // super basic dynamic voltage
+  // Dynamic voltage scaling: idle = 6V, scales up 2V per speed level (max 6+2*3 = 12V)
   driver.voltage_limit = 6 + (2 * abs(rover_speed[0]));
 }

@@ -1,5 +1,8 @@
 #include <Arduino.h>
 #include "controlfoc.h"
+
+// Conversion factor: 60 / (2 * PI) = 9.5492965855137
+// Precomputed as a literal to avoid the division at runtime.
 /*
 converts radians per second to RPM
 */

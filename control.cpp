@@ -1,3 +1,9 @@
+// control.cpp
+// Legacy manual-stepping BLDC control layer.
+// Drives motor windings directly via GPIO (no FOC library).
+// NOT called by the current BLControl.ino — kept for reference.
+// Target hardware: Arduino Nano (AVR); allLow() uses Nano-specific port registers.
+
 #include <Arduino.h>
 #include "control.h"
 

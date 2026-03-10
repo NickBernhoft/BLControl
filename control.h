@@ -1,4 +1,8 @@
 // control.h
+// Legacy manual-stepping BLDC control layer.
+// Drives motor windings directly via GPIO without a FOC library.
+// NOT used by the current BLControl.ino — superseded by controlfoc.h/cpp + SimpleFOC.
+// Retained for reference and potential future use.
 #ifndef CONTROL_H
 #define CONTROL_H
 
