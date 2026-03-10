@@ -11,7 +11,7 @@ float step_size = 0.25;   // radians per step
 float target_velocity[2] = {0.0}; // radians per second
 
 byte incoming_byte = 255;
-int rover_speed[2] = {0}; // positave for clockwise
+int rover_speed[2] = {0}; // positive for clockwise
 
 void setup() {
   Serial.begin(115200);
@@ -104,15 +104,9 @@ void loop() {
   for(int i = 0; i < NUM_BANKS; i++)
   {
     rover_speed[i] = clamp(rover_speed[i], NUM_SPEEDS * -1, NUM_SPEEDS);
-    target_velocity[i] = RPMtoRads(RPM_MULT * rover_speed[0]);
+    target_velocity[i] = RPMtoRads(RPM_MULT * rover_speed[i]);
   }
 
   // super basic dynamic voltage
   driver.voltage_limit = 6 + (2 * abs(rover_speed[0]));
-
-  // debug code
-  Serial.print("Rover Speeds: ");
-  Serial.print(rover_speed[0]);
-  Serial.print(", ");
-  Serial.println(rover_speed[1]);
 }
