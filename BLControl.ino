@@ -44,54 +44,61 @@ void loop() {
   {
     motor.loopFOC();
     motor.move(target_velocity[0]);
+  }
 
-    incoming_byte = Serial.read();
+  /*
+  IMPORTANT NOTE:
+  we moved the input handling loop outside the motor loop.
+  the inputs are buffered, so if you increase the LOOP_DUTY_CYCLE
+  too much, it will be high latency between the inputs and seeing them
+  on the actual robot.
+  We chose to prioritize the execution of the simpleFOC loop
+  in terms of overall CPU time for the smoothest operation.
+  */
 
-    // movment logic
-    switch(incoming_byte)
-    {
-      case 's':
-      case ROVER_STOP:
-        rover_speed[0] = 0;
-        rover_speed[1] = 0;
-        Serial.println("ROVER_STOP");
-        break;
 
-      case 'f':
-      case ROVER_FWD:
-        rover_speed[0]++;
-        rover_speed[1]++;
-        Serial.println("ROVER_FWD");
-        break;
+  // movment logic
+  incoming_byte = Serial.read();
+  switch(incoming_byte)
+  {
+    case 's':
+    case ROVER_STOP:
+      rover_speed[0] = 0;
+      rover_speed[1] = 0;
+      Serial.println("ROVER_STOP");
+      break;
 
-      case 'r':
-      case ROVER_REV:
-        rover_speed[0]--;
-        rover_speed[1]--;
-        Serial.println("ROVER_REV");
-        break;
-      
-      case 'l':
-      case ROVER_LEFT:
-        rover_speed[0]--;
-        rover_speed[1]++;
-        Serial.println("ROVER_LEFT");
-        break;
+    case 'f':
+    case ROVER_FWD:
+      rover_speed[0]++;
+      rover_speed[1]++;
+      Serial.println("ROVER_FWD");
+      break;
 
-      case 'k': // k bc its next to l
-      case ROVER_RIGHT:
-        rover_speed[0]++;
-        rover_speed[1]--;
-        Serial.println("ROVER_RIGHT");
-        break;
-    }
+    case 'r':
+    case ROVER_REV:
+      rover_speed[0]--;
+      rover_speed[1]--;
+      Serial.println("ROVER_REV");
+      break;
     
+    case 'l':
+    case ROVER_LEFT:
+      rover_speed[0]--;
+      rover_speed[1]++;
+      Serial.println("ROVER_LEFT");
+      break;
+
+    case 'k': // k bc its next to l
+    case ROVER_RIGHT:
+      rover_speed[0]++;
+      rover_speed[1]--;
+      Serial.println("ROVER_RIGHT");
+      break;
   }
 
   
-
-  // add some dynamic voltage code?
-  // holding gets reduced voltage, higher speeds get higher voltage?
+  // motor control code.
 
   // note: using constrain() is super slow for some reason.
   for(int i = 0; i < NUM_BANKS; i++)
