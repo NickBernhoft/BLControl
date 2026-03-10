@@ -10,19 +10,13 @@
 #define PWM_FREQUENCY 20000
 #define SUPPLY_VOLTAGE 12.0
 #define NUM_SPEEDS 3  // number of motor speeds. 3 foward, 3 backwards
+#define RPM_MULT 333 // targeting 1000 rpm (999)
 #define LOOP_DUTY_CYCLE 1000 // ratio between motor mo
 
 // function prototypes
 float radstoRPM(float rads);
 float RPMtoRads(float rpm);
 int clamp(int input, int min, int max);
-
-enum motor_dir
-{
-  FWD = 1,
-  REV = -1,
-  SPIN = 0
-};
 
 // commands from the pi
 enum COMMANDS {

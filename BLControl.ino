@@ -21,7 +21,7 @@ void setup() {
 
   driver.voltage_power_supply = SUPPLY_VOLTAGE;
   driver.voltage_limit = 8;
-  driver.pwm_frequency = 20000;
+  driver.pwm_frequency = PWM_FREQUENCY;
   driver.init();
 
   motor.linkDriver(&driver);
@@ -97,7 +97,7 @@ void loop() {
   for(int i = 0; i < NUM_BANKS; i++)
   {
     rover_speed[i] = clamp(rover_speed[i], NUM_SPEEDS * -1, NUM_SPEEDS);
-    target_velocity[i] = RPMtoRads(333 * rover_speed[0]);
+    target_velocity[i] = RPMtoRads(RPM_MULT * rover_speed[0]);
   }
 
   // super basic dynamic voltage
