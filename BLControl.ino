@@ -3,15 +3,18 @@
 
 #define POLE_PAIRS 7
 
-BLDCMotor motor(POLE_PAIRS);
-BLDCDriver3PWM driver(9, 10, 11, 8);
+BLDCMotor motor0(POLE_PAIRS);
+BLDCDriver3PWM driver0(9, 10, 11, 8);
+
+BLDCMotor motor1(POLE_PAIRS);
+BLDCDriver3PWM driver1(5, 6, 7, 4);
 
 float target_angle = 0.0;
 float step_size = 0.25;   // radians per step
 float target_velocity[2] = {0.0}; // radians per second (actual, ramped)
 float desired_velocity[2] = {0.0}; // radians per second (commanded)
 
-#define RAMP_RATE 0.005 // rad/s per FOC loop iteration (runs LOOP_DUTY_CYCLE times per outer loop)
+#define RAMP_RATE 0.05 // rad/s per FOC loop iteration (runs LOOP_DUTY_CYCLE times per outer loop)
 
 byte incoming_byte = 255;
 int rover_speed[2] = {0}; // positive for clockwise
@@ -19,25 +22,37 @@ int rover_speed[2] = {0}; // positive for clockwise
 void setup() {
   Serial.begin(115200);
 
+  // enable pin must be set to high on all drivers
   pinMode(8, OUTPUT);
   digitalWrite(8, HIGH);
+  pinMode(4, OUTPUT);
+  digitalWrite(4, HIGH);
 
-  driver.voltage_power_supply = SUPPLY_VOLTAGE;
-  driver.voltage_limit = 8;
-  driver.pwm_frequency = PWM_FREQUENCY;
-  driver.init();
+  // motor 0 setup
+  driver0.voltage_power_supply = SUPPLY_VOLTAGE;
+  driver0.voltage_limit = 8;
+  driver0.pwm_frequency = PWM_FREQUENCY;
+  driver0.init();
 
-  motor.linkDriver(&driver);
+  motor0.linkDriver(&driver0);
+  motor0.controller = MotionControlType::velocity_openloop;
+  motor0.voltage_limit = SUPPLY_VOLTAGE;
+  motor0.init();
+  motor0.enable();
 
+  // motor 1 setup
+  driver1.voltage_power_supply = SUPPLY_VOLTAGE;
+  driver1.voltage_limit = 8;
+  driver1.pwm_frequency = PWM_FREQUENCY;
+  driver1.init();
 
-  motor.controller = MotionControlType::velocity_openloop;
+  motor1.linkDriver(&driver1);
+  motor1.controller = MotionControlType::velocity_openloop;
+  motor1.voltage_limit = SUPPLY_VOLTAGE;
+  motor1.init();
+  motor1.enable();
 
-  motor.voltage_limit = SUPPLY_VOLTAGE;
-
-  motor.init();
-  motor.enable();
-
-  Serial.println("Motor ready");
+  Serial.println("Motors ready");
 }
 
 void loop() {
@@ -45,14 +60,19 @@ void loop() {
   
   for(int i = 0; i < LOOP_DUTY_CYCLE; i++)
   {
-    // ramp target_velocity toward desired_velocity each FOC iteration
-    float diff = desired_velocity[0] - target_velocity[0];
-    if(diff > RAMP_RATE)       target_velocity[0] += RAMP_RATE;
-    else if(diff < -RAMP_RATE) target_velocity[0] -= RAMP_RATE;
-    else                       target_velocity[0] = desired_velocity[0];
+    // ramp both motors toward desired velocity each FOC iteration
+    for(int b = 0; b < NUM_BANKS; b++)
+    {
+      float diff = desired_velocity[b] - target_velocity[b];
+      if(diff > RAMP_RATE)       target_velocity[b] += RAMP_RATE;
+      else if(diff < -RAMP_RATE) target_velocity[b] -= RAMP_RATE;
+      else                       target_velocity[b] = desired_velocity[b];
+    }
 
-    motor.loopFOC();
-    motor.move(target_velocity[0]);
+    motor0.loopFOC();
+    motor0.move(target_velocity[0]);
+    motor1.loopFOC();
+    motor1.move(target_velocity[1]);
   }
 
   /*
@@ -122,7 +142,9 @@ void loop() {
     desired_velocity[i] = RPMtoRads(RPM_MULT * rover_speed[i]);
   }
 
-  // dynamic voltage scaled to actual ramped speed
-  float actual_rpm = abs(radstoRPM(target_velocity[0]));
-  driver.voltage_limit = 6 + (2.0 * actual_rpm / RPM_MULT);
+  // dynamic voltage scaled to actual ramped speed per motor
+  float rpm0 = abs(radstoRPM(target_velocity[0]));
+  driver0.voltage_limit = 6 + (2.0 * rpm0 / RPM_MULT);
+  float rpm1 = abs(radstoRPM(target_velocity[1]));
+  driver1.voltage_limit = 6 + (2.0 * rpm1 / RPM_MULT);
 }
