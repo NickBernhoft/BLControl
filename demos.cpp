@@ -20,9 +20,9 @@ void rampDemo()
 
 void ramp2Demo()
 {
-  ramp2(0, 4500, REV, 10);
+  ramp2(0, 4500, REV, 10, 0);
   Serial.println("DOne");
-  ramp2(4500, 0, REV, 10);
+  ramp2(4500, 0, REV, 10, 1);
 
   delay(1000);
 }
@@ -128,7 +128,7 @@ void SpinDemo()
 {
     for(int i = 0; i < 6 * 7; i++)
   {
-    step(1);
+    step(1, 0);
     delay(24);
   }
 
@@ -143,7 +143,7 @@ void spinDemo2()
   int temp = 1;
   for(int i = 0; i < 6 * 7; i++)
   {
-    step(temp);
+    step(temp, 0);
     delay(5);
   }
 
@@ -157,7 +157,7 @@ void spinDemo2()
 //ramp to 3500 rpm test code
 void oldRampDemo()
 {
-    step(-1);
+  step(-1, 0);
   float mrs = 3000;
   delayMicroseconds(mrs);
   mrs--;
@@ -167,3 +167,14 @@ void oldRampDemo()
     mrs = 400;
   }
 }
+
+  // run both directions demo
+  // runRPM(500, 3.0, SPIN, 0);
+  // runRPM(500, 3.0, SPIN, 1);
+  // delay(1000);
+  // runRPM(500, 1.0, FWD, 1);
+  // runRPM(500, 1.0, FWD, 0);
+  // delay (1000);
+  // runRPM(500, 1.0, REV, 0);
+  // runRPM(500, 1.0, REV, 1);
+  // delay(2000);
