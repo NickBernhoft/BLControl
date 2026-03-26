@@ -20,7 +20,7 @@ BLDCMotor motor2(POLE_PAIRS);
 BLDCDriver3PWM driver2(7, 6, 5, NOT_SET);
 
 BLDCMotor motor3(POLE_PAIRS);
-BLDCDriver3PWM driver3(3, 12, 11, NOT_SET);
+BLDCDriver3PWM driver3(13, 12, 11, NOT_SET);
 
 float target_angle = 0.0;
 float step_size = 0.25;   // radians per step
