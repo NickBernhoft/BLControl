@@ -159,7 +159,7 @@ void loop() {
       Serial.println("ROVER_FWD");
       break;
 
-    case 'r':
+    case 'b': // b for backwards since r is taken
     case ROVER_REV:
       rover_speed[0]--;
       rover_speed[1]--;
@@ -173,7 +173,7 @@ void loop() {
       Serial.println("ROVER_LEFT");
       break;
 
-    case 'k': // k bc its next to l
+    case 'r':
     case ROVER_RIGHT:
       rover_speed[0]++;
       rover_speed[1]--;
