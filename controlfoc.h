@@ -9,7 +9,7 @@
 #define PWM_FREQUENCY 20000          // Hz
 #define SUPPLY_VOLTAGE 12.0          // volts
 #define NUM_SPEEDS 3                 // speed levels in each direction (e.g. 1–3 forward, 1–3 reverse)
-#define RPM_MULT 333                 // RPM per speed level; level 3 = 999 RPM (~1000 target)
+#define RPM_MULT 200                 // RPM per speed level; level 3 = 600 RPM
 #define LOOP_DUTY_CYCLE 1000         // FOC loop iterations per main loop pass (controls CPU split between FOC and I/O)
 
 // function prototypes

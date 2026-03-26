@@ -10,17 +10,17 @@
 
 // Bank 0: Motor 0 & Motor 1 (move in sync)
 BLDCMotor motor0(POLE_PAIRS);
-BLDCDriver3PWM driver0(9, 10, 11, 8);
+BLDCDriver3PWM driver0(4, 3, 2, NOT_SET);
 
 BLDCMotor motor1(POLE_PAIRS);
-BLDCDriver3PWM driver1(5, 6, 7, 4);
+BLDCDriver3PWM driver1(10, 9, 8, NOT_SET);
 
 // Bank 1: Motor 2 & Motor 3 (move in sync)
 BLDCMotor motor2(POLE_PAIRS);
-BLDCDriver3PWM driver2(2, 3, 12, 24);  // TODO: fill in actual pins
+BLDCDriver3PWM driver2(7, 6, 5, NOT_SET);
 
 BLDCMotor motor3(POLE_PAIRS);
-BLDCDriver3PWM driver3(25, 26, 27, 28);  // TODO: fill in actual pins
+BLDCDriver3PWM driver3(3, 12, 11, NOT_SET);
 
 float target_angle = 0.0;
 float step_size = 0.25;   // radians per step
@@ -35,15 +35,16 @@ int rover_speed[2] = {0}; // positive for clockwise
 void setup() {
   Serial.begin(115200);
 
+  // ONLY NEEDED IF EN PINS PLUGGED INTO ARDUINO INSTEAD OF 3V3 PIN ON DRIVER
   // enable pin must be set to high on all drivers
-  pinMode(8, OUTPUT);
-  digitalWrite(8, HIGH);
-  pinMode(4, OUTPUT);
-  digitalWrite(4, HIGH);
-  pinMode(24, OUTPUT);
-  digitalWrite(24, HIGH);
-  pinMode(28, OUTPUT);
-  digitalWrite(28, HIGH);
+  // pinMode(8, OUTPUT);
+  // digitalWrite(8, HIGH);
+  // pinMode(4, OUTPUT);
+  // digitalWrite(4, HIGH);
+  // pinMode(24, OUTPUT);
+  // digitalWrite(24, HIGH);
+  // pinMode(28, OUTPUT);
+  // digitalWrite(28, HIGH);
 
   // motor 0 setup (Bank 0)
   driver0.voltage_power_supply = SUPPLY_VOLTAGE;

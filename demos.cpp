@@ -33,7 +33,7 @@ void ramp2Demo()
 
 void meglovania()
 {
-  // the first 4 notes of meglovania lmao
+  // the first 4 notes of meglovania
   music_bpm = 240;
   playNote(D, 5, 8);
   delay(10);
