@@ -102,6 +102,50 @@ void loop() {
   
   for(int i = 0; i < LOOP_DUTY_CYCLE; i++)
   {
+    // Check for serial commands frequently inside the FOC loop for low latency
+    // Only check every Nth iteration to minimize overhead
+    if(i % 10 == 0 && Serial.available() > 0)
+    {
+      incoming_byte = Serial.read();
+      switch(incoming_byte)
+      {
+        case 's':
+        case ROVER_STOP:
+          rover_speed[0] = 0;
+          rover_speed[1] = 0;
+          Serial.println("ROVER_STOP");
+          break;
+
+        case 'f':
+        case ROVER_FWD:
+          rover_speed[0]++;
+          rover_speed[1]++;
+          Serial.println("ROVER_FWD");
+          break;
+
+        case 'b': // b for backwards since r is taken
+        case ROVER_REV:
+          rover_speed[0]--;
+          rover_speed[1]--;
+          Serial.println("ROVER_REV");
+          break;
+        
+        case 'l':
+        case ROVER_LEFT:
+          rover_speed[0]--;
+          rover_speed[1]++;
+          Serial.println("ROVER_LEFT");
+          break;
+
+        case 'r':
+        case ROVER_RIGHT:
+          rover_speed[0]++;
+          rover_speed[1]--;
+          Serial.println("ROVER_RIGHT");
+          break;
+      }
+    }
+
     // ramp both motors toward desired velocity each FOC iteration
     for(int b = 0; b < NUM_BANKS; b++)
     {
@@ -124,67 +168,8 @@ void loop() {
     motor3.move(target_velocity[1]);
   }
 
-  /*
-  IMPORTANT NOTE:
-  we moved the input handling loop outside the motor loop.
-  the inputs are buffered, so if you increase the LOOP_DUTY_CYCLE
-  too much, it will be high latency between the inputs and seeing them
-  on the actual robot.
-  We chose to prioritize the execution of the simpleFOC loop
-  in terms of overall CPU time for the smoothest operation.
-  */
-
-
-  // movment logic
-  // ROVER_STOP = 0x00,
-  // ROVER_FWD = 0x01,
-  // ROVER_REV = 0x02,
-  // ROVER_LEFT = 0x03,
-  // ROVER_RIGHT = 0x04,
-  
-  incoming_byte = Serial.read();
-  switch(incoming_byte)
-  {
-    case 's':
-    case ROVER_STOP:
-      rover_speed[0] = 0;
-      rover_speed[1] = 0;
-      Serial.println("ROVER_STOP");
-      break;
-
-    case 'f':
-    case ROVER_FWD:
-      rover_speed[0]++;
-      rover_speed[1]++;
-      Serial.println("ROVER_FWD");
-      break;
-
-    case 'b': // b for backwards since r is taken
-    case ROVER_REV:
-      rover_speed[0]--;
-      rover_speed[1]--;
-      Serial.println("ROVER_REV");
-      break;
-    
-    case 'l':
-    case ROVER_LEFT:
-      rover_speed[0]--;
-      rover_speed[1]++;
-      Serial.println("ROVER_LEFT");
-      break;
-
-    case 'r':
-    case ROVER_RIGHT:
-      rover_speed[0]++;
-      rover_speed[1]--;
-      Serial.println("ROVER_RIGHT");
-      break;
-  }
-
-  
-  // motor control code.
-
-  // note: using constrain() is super slow for some reason.
+  // motor control code runs after each complete FOC cycle
+  // Apply speed clamping and update desired velocities based on current rover_speed setting
   for(int i = 0; i < NUM_BANKS; i++)
   {
     rover_speed[i] = clamp(rover_speed[i], NUM_SPEEDS * -1, NUM_SPEEDS);
